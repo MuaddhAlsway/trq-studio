@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA — Architecture Studio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Neue+Haas+Grotesk+Display+Pro:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#0a0a0a;--white:#f8f6f1;--cream:#ede9e0;--stone:#c8c2b4;--mid:#7a7468;--dark:#1a1814;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Neue Haas Grotesk Display Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+html{scroll-behavior:auto;font-size:16px}
+body{background:var(--black);color:var(--white);font-family:var(--sans);font-weight:300;overflow-x:hidden;cursor:none}
+
+/* CUSTOM CURSOR */
+#cursor{position:fixed;width:8px;height:8px;background:var(--white);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .4s,height .4s,background .4s;mix-blend-mode:difference}
+#cursor-follower{position:fixed;width:40px;height:40px;border:1px solid rgba(248,246,241,.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .08s linear}
+body:hover #cursor{opacity:1}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:2.5rem 4rem;display:flex;align-items:center;justify-content:space-between;mix-blend-mode:difference}
+.nav-logo{font-family:var(--serif);font-size:1.4rem;font-weight:400;letter-spacing:.25em;color:var(--white);text-transform:uppercase;text-decoration:none}
+.nav-links{display:flex;gap:3rem;list-style:none}
+.nav-links a{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);text-decoration:none;opacity:.7;transition:opacity .6s}
+.nav-links a:hover{opacity:1}
+.nav-menu-btn{background:none;border:none;color:var(--white);font-family:var(--sans);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;cursor:none;opacity:.7;transition:opacity .6s}
+.nav-menu-btn:hover{opacity:1}
+
+/* HERO */
+#hero{position:relative;width:100%;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.hero-bg{position:absolute;inset:0;will-change:transform}
+.hero-bg-img{width:100%;height:120%;object-fit:cover;transform-origin:center center}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,10,.15) 0%,rgba(10,10,10,.45) 100%)}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:1100px;padding:0 2rem}
+.hero-eyebrow{font-size:.68rem;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:2.5rem;opacity:0}
+.hero-title{font-family:var(--serif);font-size:clamp(4.5rem,9vw,10rem);font-weight:300;line-height:.92;letter-spacing:-.01em;margin-bottom:3rem;overflow:hidden}
+.hero-title-line{display:block;overflow:hidden}
+.hero-title-word{display:inline-block;transform:translateY(110%);opacity:0}
+.hero-subtitle{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);opacity:0;margin-bottom:4rem}
+.hero-scroll-hint{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.75rem;opacity:0;z-index:2}
+.scroll-line{width:1px;height:60px;background:var(--stone);transform-origin:top;animation:scrollPulse 2.5s ease-in-out infinite}
+.scroll-label{font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--stone)}
+@keyframes scrollPulse{0%{transform:scaleY(0);opacity:0}40%{opacity:1}100%{transform:scaleY(1);opacity:0}}
+
+/* MARQUEE */
+.marquee-section{padding:2rem 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);background:var(--black);overflow:hidden}
+.marquee-track{display:flex;gap:0;white-space:nowrap;will-change:transform}
+.marquee-item{display:inline-flex;align-items:center;gap:3rem;padding:0 3rem;font-family:var(--serif);font-size:1.1rem;font-weight:300;font-style:italic;color:var(--stone);letter-spacing:.05em;flex-shrink:0}
+.marquee-dot{width:4px;height:4px;border-radius:50%;background:var(--stone)}
+
+/* VISION SECTION */
+#vision{min-height:100vh;background:var(--cream);color:var(--black);display:flex;align-items:center;overflow:hidden;position:relative}
+.vision-inner{display:grid;grid-template-columns:1fr 1fr;gap:0;width:100%;min-height:100vh}
+.vision-left{padding:8rem 5rem 8rem 6rem;display:flex;flex-direction:column;justify-content:center}
+.vision-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mid);margin-bottom:3rem;opacity:0;transform:translateY(20px)}
+.vision-title{font-family:var(--serif);font-size:clamp(3rem,5vw,5.5rem);font-weight:300;line-height:1.05;letter-spacing:-.01em;margin-bottom:3.5rem;overflow:hidden}
+.vision-title-line{display:block;overflow:hidden}
+.vision-title-word{display:inline-block;transform:translateY(100%)}
+.vision-body{font-size:.95rem;line-height:1.85;color:var(--mid);max-width:420px;opacity:0;transform:translateY(25px)}
+.vision-body p+p{margin-top:1.5rem}
+.vision-cta{margin-top:3.5rem;display:inline-flex;align-items:center;gap:1.5rem;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--black);text-decoration:none;opacity:0;transform:translateY(20px)}
+.vision-cta-line{width:40px;height:1px;background:var(--black);transition:width .8s ease}
+.vision-cta:hover .vision-cta-line{width:80px}
+.vision-right{position:relative;overflow:hidden}
+.vision-img-wrap{position:absolute;inset:0;overflow:hidden}
+.vision-img{width:100%;height:100%;object-fit:cover;transform:scale(1.15)}
+.vision-img-reveal{position:absolute;inset:0;background:var(--cream);transform-origin:left}
+
+/* PROJECTS */
+#projects{background:var(--black);padding:8rem 0;overflow:hidden}
+.projects-header{padding:0 6rem;margin-bottom:6rem}
+.projects-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:2rem;opacity:0;transform:translateY(20px)}
+.projects-title{font-family:var(--serif);font-size:clamp(2.8rem,4.5vw,5rem);font-weight:300;color:var(--white);overflow:hidden}
+.projects-title-line{display:block;overflow:hidden}
+.projects-title-word{display:inline-block;transform:translateY(100%)}
+.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px}
+.project-item{position:relative;overflow:hidden;cursor:none}
+.project-item:nth-child(1){grid-row:span 2}
+.project-img-wrap{position:relative;overflow:hidden;height:100%;min-height:320px}
+.project-item:nth-child(1) .project-img-wrap{min-height:640px}
+.project-img{width:100%;height:100%;object-fit:cover;transform:scale(1.05);transition:transform 1.8s cubic-bezier(.16,1,.3,1)}
+.project-item:hover .project-img{transform:scale(1.12)}
+.project-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,10,.85) 0%,rgba(10,10,10,0) 55%);opacity:0;transition:opacity .9s cubic-bezier(.16,1,.3,1)}
+.project-item:hover .project-overlay{opacity:1}
+.project-info{position:absolute;bottom:0;left:0;right:0;padding:2.5rem;transform:translateY(15px);opacity:0;transition:all .9s cubic-bezier(.16,1,.3,1)}
+.project-item:hover .project-info{transform:translateY(0);opacity:1}
+.project-num{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:.75rem}
+.project-name{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--white);margin-bottom:.5rem}
+.project-loc{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--stone)}
+.project-item-reveal{opacity:0;transform:translateY(50px)}
+
+/* STATS */
+#stats{background:var(--dark);padding:7rem 6rem;display:grid;grid-template-columns:repeat(4,1fr);gap:4rem;border-top:1px solid rgba(255,255,255,.06)}
+.stat-item{opacity:0;transform:translateY(30px)}
+.stat-num{font-family:var(--serif);font-size:clamp(3rem,5vw,5rem);font-weight:300;color:var(--white);line-height:1;margin-bottom:1rem}
+.stat-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--stone);line-height:1.7}
+
+/* PROCESS */
+#process{background:var(--cream);color:var(--black);padding:9rem 6rem;overflow:hidden}
+.process-header{margin-bottom:7rem}
+.process-label-wrap{display:flex;align-items:center;gap:2rem;margin-bottom:2.5rem;opacity:0;transform:translateY(20px)}
+.process-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mid)}
+.process-label-line{height:1px;width:40px;background:var(--mid)}
+.process-heading{font-family:var(--serif);font-size:clamp(2.8rem,4.5vw,5rem);font-weight:300;line-height:1.05;overflow:hidden}
+.process-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:4rem;margin-top:5rem}
+.step-item{opacity:0;transform:translateY(40px)}
+.step-num{font-family:var(--serif);font-size:5rem;font-weight:300;color:var(--stone);line-height:1;margin-bottom:2rem;opacity:.4}
+.step-title{font-family:var(--serif);font-size:1.5rem;font-weight:400;margin-bottom:1.25rem;color:var(--black)}
+.step-body{font-size:.875rem;line-height:1.85;color:var(--mid)}
+
+/* HORIZONTAL GALLERY */
+#gallery{background:var(--black);padding:7rem 0;overflow:hidden}
+.gallery-label{padding:0 6rem;font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:3.5rem;opacity:0;transform:translateY(20px)}
+.gallery-track-wrap{overflow:hidden}
+.gallery-track{display:flex;gap:1.5rem;padding:0 6rem;will-change:transform}
+.gallery-thumb{flex-shrink:0;width:380px;height:500px;overflow:hidden;position:relative}
+.gallery-thumb img{width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 1.5s cubic-bezier(.16,1,.3,1)}
+.gallery-thumb:hover img{transform:scale(1.1)}
+.gallery-thumb-label{position:absolute;bottom:1.5rem;left:1.5rem;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(248,246,241,.7)}
+
+/* CONTACT */
+#contact{background:var(--cream);color:var(--black);min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:8rem 4rem;overflow:hidden}
+.contact-inner{max-width:800px}
+.contact-label{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mid);margin-bottom:3rem;opacity:0;transform:translateY(20px)}
+.contact-title{font-family:var(--serif);font-size:clamp(3.5rem,7vw,7.5rem);font-weight:300;line-height:.95;letter-spacing:-.01em;margin-bottom:4rem;overflow:hidden;color:var(--black)}
+.contact-title-line{display:block;overflow:hidden}
+.contact-title-word{display:inline-block;transform:translateY(100%)}
+.contact-email{font-family:var(--serif);font-size:1.4rem;font-style:italic;color:var(--mid);margin-bottom:3.5rem;opacity:0;transform:translateY(20px)}
+.contact-btn{display:inline-flex;align-items:center;gap:1.5rem;padding:1.1rem 3rem;border:1px solid var(--black);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--black);text-decoration:none;transition:all .8s cubic-bezier(.16,1,.3,1);opacity:0;transform:translateY(20px);cursor:none}
+.contact-btn:hover{background:var(--black);color:var(--white)}
+.contact-btn-arrow{display:inline-block;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.contact-btn:hover .contact-btn-arrow{transform:translateX(6px)}
+
+/* FOOTER */
+footer{background:var(--black);padding:3rem 6rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.06)}
+.footer-logo{font-family:var(--serif);font-size:1rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone)}
+.footer-copy{font-size:.65rem;letter-spacing:.1em;color:var(--mid)}
+.footer-links{display:flex;gap:2rem}
+.footer-links a{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color .4s}
+.footer-links a:hover{color:var(--white)}
+
+/* SVG LINE DECORATION */
+.svg-line{position:absolute;opacity:.12}
+
+/* MAGNETIC BTN */
+.magnetic{display:inline-block;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+
+/* PINNED REVEAL SECTION */
+#pin-section{height:300vh;position:relative}
+.pin-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--black)}
+.pin-content{text-align:center;max-width:900px;padding:2rem}
+.pin-phase{position:absolute;width:100%;text-align:center;opacity:0;transform:translateY(30px)}
+.pin-phase-title{font-family:var(--serif);font-size:clamp(2.5rem,5vw,5.5rem);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:2rem}
+.pin-phase-body{font-size:.875rem;letter-spacing:.08em;color:var(--stone);max-width:500px;margin:0 auto;line-height:1.9}
+.pin-progress{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);display:flex;gap:.75rem}
+.pin-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .5s}
+.pin-dot.active{background:var(--white)}
+
+/* IMAGE REVEAL ANIMATION */
+.img-reveal-wrap{position:relative;overflow:hidden}
+.img-reveal-cover{position:absolute;inset:0;background:var(--black);transform-origin:left;z-index:2}
+.img-reveal-cover.cream{background:var(--cream)}
+
+/* LOADING */
+#loader{position:fixed;inset:0;background:var(--black);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem}
+.loader-logo{font-family:var(--serif);font-size:2rem;letter-spacing:.4em;text-transform:uppercase;color:var(--white);opacity:0}
+.loader-bar-wrap{width:200px;height:1px;background:rgba(255,255,255,.15);overflow:hidden}
+.loader-bar{height:100%;background:var(--white);width:0;transform-origin:left}
+.loader-pct{font-size:.65rem;letter-spacing:.2em;color:var(--stone)}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">Forma</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-pct" id="loaderPct">0</div>
+</div>
+
+<div id="cursor"></div>
+<div id="cursor-follower"></div>
+
+<nav id="main-nav" style="opacity:0">
+  <a href="#" class="nav-logo">Forma</a>
+  <ul class="nav-links">
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#vision">Studio</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-menu-btn">Menu ↗</button>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg" id="heroBg">
+    <div class="hero-bg-img" id="heroBgImg" style="width:100%;height:120%;position:relative">
+      <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c8c2b4"/>
+            <stop offset="100%" stop-color="#ede9e0"/>
+          </linearGradient>
+          <linearGradient id="buildGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3a3530"/>
+            <stop offset="100%" stop-color="#1a1814"/>
+          </linearGradient>
+          <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7a8a9a" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#4a5a6a" stop-opacity=".3"/>
+          </linearGradient>
+        </defs>
+        <rect width="1600" height="900" fill="url(#skyGrad)"/>
+        <rect x="0" y="200" width="1600" height="700" fill="#e8e0d0"/>
+        <!-- Ground -->
+        <rect x="0" y="750" width="1600" height="150" fill="#d4cfc5"/>
+        <!-- Main building -->
+        <rect x="450" y="180" width="700" height="570" fill="url(#buildGrad)"/>
+        <!-- Glass facade grid -->
+        <rect x="460" y="190" width="680" height="550" fill="url(#glassGrad)"/>
+        <!-- Window grid lines horizontal -->
+        <line x1="460" y1="240" x2="1140" y2="240" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="290" x2="1140" y2="290" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="340" x2="1140" y2="340" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="390" x2="1140" y2="390" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="440" x2="1140" y2="440" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="490" x2="1140" y2="490" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="540" x2="1140" y2="540" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="590" x2="1140" y2="590" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="640" x2="1140" y2="640" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="460" y1="690" x2="1140" y2="690" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <!-- Window grid vertical -->
+        <line x1="530" y1="190" x2="530" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="600" y1="190" x2="600" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="670" y1="190" x2="670" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="740" y1="190" x2="740" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="810" y1="190" x2="810" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="880" y1="190" x2="880" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="950" y1="190" x2="950" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="1020" y1="190" x2="1020" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <line x1="1090" y1="190" x2="1090" y2="740" stroke="#8a9aaa" stroke-width=".5" opacity=".4"/>
+        <!-- Side building left -->
+        <rect x="150" y="300" width="300" height="450" fill="#2a2520"/>
+        <rect x="160" y="310" width="280" height="430" fill="#8a9aaa" opacity=".2"/>
+        <!-- Side building right -->
+        <rect x="1150" y="350" width="250" height="400" fill="#2a2520"/>
+        <rect x="1160" y="360" width="230" height="380" fill="#8a9aaa" opacity=".15"/>
+        <!-- Foreground ground elements -->
+        <rect x="0" y="755" width="1600" height="10" fill="#bfbab0"/>
+        <!-- Sky details -->
+        <rect x="200" y="80" width="80" height="3" fill="#b0aca4" opacity=".4"/>
+        <rect x="1300" y="120" width="60" height="2" fill="#b0aca4" opacity=".3"/>
+        <rect x="900" y="50" width="100" height="2" fill="#b0aca4" opacity=".25"/>
+      </svg>
+    </div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content" id="heroContent">
+    <div class="hero-eyebrow" id="heroEyebrow">Architecture & Interior Design Studio — Est. 2008</div>
+    <h1 class="hero-title">
+      <span class="hero-title-line"><span class="hero-title-word" id="hw1">Space</span></span>
+      <span class="hero-title-line"><span class="hero-title-word" id="hw2" style="margin-left:2em;font-style:italic">as</span> <span class="hero-title-word" id="hw3">Language</span></span>
+    </h1>
+    <p class="hero-subtitle" id="heroSubtitle">Crafting environments that transcend the ordinary</p>
+  </div>
+  <div class="hero-scroll-hint" id="heroScrollHint">
+    <div class="scroll-line"></div>
+    <span class="scroll-label">Scroll</span>
+  </div>
+</section>
+
+<section class="marquee-section" id="marqueeSection">
+  <div class="marquee-track" id="marqueeTrack">
+    <span class="marquee-item">Architecture <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Interior Design <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Urban Planning <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Landscape Design <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Spatial Curation <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Architecture <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Interior Design <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Urban Planning <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Landscape Design <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Spatial Curation <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Architecture <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Interior Design <span class="marquee-dot"></span></span>
+  </div>
+</section>
+
+<section id="vision">
+  <div class="vision-inner">
+    <div class="vision-left">
+      <div class="vision-label" id="visionLabel">Studio Vision</div>
+      <h2 class="vision-title">
+        <span class="vision-title-line"><span class="vision-title-word" id="vw1">We</span> <span class="vision-title-word" id="vw2">design</span></span>
+        <span class="vision-title-line"><span class="vision-title-word" id="vw3">the</span> <span class="vision-title-word" id="vw4">spaces</span></span>
+        <span class="vision-title-line"><span class="vision-title-word" id="vw5" style="font-style:italic">between</span></span>
+      </h2>
+      <div class="vision-body" id="visionBody">
+        <p>We are a collective of architects and designers united by a singular conviction: that extraordinary spaces elevate the human condition. Every project begins with careful listening — to the land, the light, and the lives that will unfold within.</p>
+        <p>Our work is defined by restraint and precision. We remove until nothing can be taken away, leaving only what is essential and inevitable.</p>
+      </div>
+      <a href="#" class="vision-cta" id="visionCta">
+        <span class="vision-cta-line"></span>
+        Discover Our Practice
+      </a>
+    </div>
+    <div class="vision-right">
+      <div class="vision-img-wrap">
+        <div class="img-reveal-cover cream" id="visionImgCover"></div>
+        <svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;object-fit:cover" id="visionImg">
+          <defs>
+            <linearGradient id="intG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8e0d0"/>
+              <stop offset="100%" stop-color="#d4cfc5"/>
+            </linearGradient>
+            <linearGradient id="wallG" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c8c2b4"/>
+              <stop offset="100%" stop-color="#ddd8cf"/>
+            </linearGradient>
+          </defs>
+          <rect width="800" height="1000" fill="url(#intG)"/>
+          <!-- Room interior -->
+          <rect x="0" y="0" width="800" height="600" fill="#e8e0d0"/>
+          <!-- Back wall -->
+          <rect x="100" y="50" width="600" height="500" fill="url(#wallG)"/>
+          <!-- Floor -->
+          <rect x="0" y="600" width="800" height="400" fill="#c8c2b4"/>
+          <!-- Floor lines perspective -->
+          <line x1="0" y1="600" x2="800" y2="600" stroke="#b8b2a4" stroke-width="1"/>
+          <line x1="100" y1="700" x2="700" y2="700" stroke="#b8b2a4" stroke-width=".7" opacity=".6"/>
+          <line x1="200" y1="800" x2="600" y2="800" stroke="#b8b2a4" stroke-width=".5" opacity=".4"/>
+          <!-- Large window -->
+          <rect x="250" y="100" width="300" height="400" fill="#b0c0d0" opacity=".4"/>
+          <line x1="400" y1="100" x2="400" y2="500" stroke="#9090a0" stroke-width="1.5"/>
+          <line x1="250" y1="280" x2="550" y2="280" stroke="#9090a0" stroke-width="1.5"/>
+          <!-- Minimal chair -->
+          <rect x="500" y="450" width="100" height="8" fill="#3a3530" rx="1"/>
+          <rect x="505" y="350" width="8" height="108" fill="#3a3530"/>
+          <rect x="587" y="350" width="8" height="108" fill="#3a3530"/>
+          <rect x="505" y="350" width="90" height="60" fill="#5a5550" opacity=".8"/>
+          <!-- Side table -->
+          <rect x="150" y="490" width="80" height="6" fill="#3a3530" rx="1"/>
+          <rect x="170" y="496" width="6" height="100" fill="#3a3530"/>
+          <rect x="218" y="496" width="6" height="100" fill="#3a3530"/>
+          <!-- Vase/object -->
+          <ellipse cx="190" cy="490" rx="15" ry="5" fill="#7a7468"/>
+          <rect x="183" y="430" width="14" height="60" fill="#7a7468" rx="7"/>
+          <ellipse cx="190" cy="430" rx="10" ry="4" fill="#6a6458"/>
+          <!-- Light -->
+          <ellipse cx="400" cy="30" rx="25" ry="8" fill="#3a3530"/>
+          <rect x="398" y="30" width="4" height="50" fill="#3a3530"/>
+          <circle cx="400" cy="80" r="12" fill="#f0ead8" opacity=".9"/>
+          <!-- Shadow/light on floor -->
+          <rect x="200" y="600" width="400" height="200" fill="rgba(180,175,165,.2)"/>
+        </svg>
+        <div class="vision-img" id="visionImgEl" style="position:absolute;inset:0;width:100%;height:100%"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pin-section">
+  <div class="pin-sticky">
+    <div class="pin-content">
+      <div class="pin-phase" id="phase1">
+        <div style="font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:2rem">01 — Discovery</div>
+        <h3 class="pin-phase-title">Every great work<br>begins with<br><em>listening</em></h3>
+        <p class="pin-phase-body">We immerse ourselves in context — land, culture, light, and the lives that will inhabit these spaces.</p>
+      </div>
+      <div class="pin-phase" id="phase2">
+        <div style="font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:2rem">02 — Vision</div>
+        <h3 class="pin-phase-title">Architecture is<br><em>frozen</em><br>music</h3>
+        <p class="pin-phase-body">We translate emotional resonance into structural form, composing space as a conductor composes sound.</p>
+      </div>
+      <div class="pin-phase" id="phase3">
+        <div style="font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin-bottom:2rem">03 — Craft</div>
+        <h3 class="pin-phase-title">Details are<br>not details —<br>they <em>are</em> the design</h3>
+        <p class="pin-phase-body">Each material chosen for its tactility, each joint resolved with obsessive care, each threshold considered as a moment of arrival.</p>
+      </div>
+    </div>
+    <div class="pin-progress">
+      <div class="pin-dot active" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="projects-header">
+    <div class="projects-label" id="projLabel">Selected Work</div>
+    <h2 class="projects-title">
+      <span class="projects-title-line"><span class="projects-title-word" id="ptw1">Featured</span></span>
+      <span class="projects-title-line"><span class="projects-title-word" id="ptw2">Projects</span></span>
+    </h2>
+  </div>
+  <div class="projects-grid">
+    <div class="project-item project-item-reveal" id="pi1">
+      <div class="project-img-wrap img-reveal-wrap">
+        <div class="img-reveal-cover" id="pr1"></div>
+        <svg viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;position:absolute;inset:0">
+          <rect width="800" height="900" fill="#1a1814"/>
+          <rect x="0" y="0" width="800" height="900" fill="#2a2520"/>
+          <!-- Brutalist structure -->
+          <rect x="100" y="100" width="600" height="700" fill="#1e1c18"/>
+          <!-- Horizontal layers -->
+          <rect x="100" y="200" width="600" height="15" fill="#2e2c28"/>
+          <rect x="100" y="350" width="600" height="15" fill="#2e2c28"/>
+          <rect x="100" y="500" width="600" height="15" fill="#2e2c28"/>
+          <rect x="100" y="650" width="600" height="15" fill="#2e2c28"/>
+          <!-- Window slits -->
+          <rect x="130" y="140" width="80" height="40" fill="#8090a0" opacity=".35"/>
+          <rect x="280" y="140" width="80" height="40" fill="#8090a0" opacity=".3"/>
+          <rect x="430" y="140" width="80" height="40" fill="#8090a0" opacity=".35"/>
+          <rect x="580" y="140" width="80" height="40" fill="#8090a0" opacity=".25"/>
+          <rect x="130" y="260" width="80" height="40" fill="#8090a0" opacity=".3"/>
+          <rect x="430" y="260" width="80" height="40" fill="#8090a0" opacity=".25"/>
+          <rect x="130" y="410" width="80" height="40" fill="#8090a0" opacity=".35"/>
+          <rect x="280" y="410" width="80" height="40" fill="#8090a0" opacity=".2"/>
+          <rect x="580" y="410" width="80" height="40" fill="#8090a0" opacity=".3"/>
+          <!-- Texture -->
+          <rect x="0" y="850" width="800" height="50" fill="#3a3530"/>
+        </svg>
+      </div>
+      <div class="project-overlay"></div>
+      <div class="project-info">
+        <div class="project-num">01</div>
+        <div class="project-name">The Monolith</div>
+        <div class="project-loc">Oslo, Norway — 2023</div>
+      </div>
+    </div>
+    <div class="project-item project-item-reveal" id="pi2" style="transition-delay:.15s">
+      <div class="project-img-wrap img-reveal-wrap" style="min-height:320px">
+        <div class="img-reveal-cover" id="pr2"></div>
+        <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;position:absolute;inset:0">
+          <rect width="800" height="450" fill="#ede9e0"/>
+          <!-- Minimal villa -->
+          <rect x="50" y="200" width="700" height="200" fill="#e0d8c8"/>
+          <rect x="50" y="150" width="700" height="55" fill="#d4ccc0"/>
+          <!-- Large glazing -->
+          <rect x="200" y="155" width="400" height="190" fill="#a0b0c0" opacity=".45"/>
+          <line x1="400" y1="155" x2="400" y2="345" stroke="#8898a8" stroke-width="2"/>
+          <!-- Flat roof overhang -->
+          <rect x="20" y="140" width="760" height="12" fill="#c8c2b4"/>
+          <!-- Pillar -->
+          <rect x="280" y="345" width="12" height="50" fill="#b8b2a4"/>
+          <rect x="508" y="345" width="12" height="50" fill="#b8b2a4"/>
+          <!-- Pool -->
+          <rect x="150" y="360" width="500" height="30" fill="#7090a0" opacity=".3" rx="2"/>
+          <!-- Sky/landscape -->
+          <rect x="0" y="0" width="800" height="200" fill="#d8d0c4"/>
+          <rect x="0" y="175" width="800" height="30" fill="#c0b8ac"/>
+          <!-- Trees -->
+          <rect x="680" y="130" width="3" height="70" fill="#8a8478"/>
+          <ellipse cx="681" cy="120" rx="18" ry="22" fill="#9a9490" opacity=".6"/>
+          <rect x="750" y="150" width="3" height="50" fill="#8a8478"/>
+          <ellipse cx="751" cy="140" rx="12" ry="15" fill="#9a9490" opacity=".5"/>
+        </svg>
+      </div>
+      <div class="project-overlay"></div>
+      <div class="project-info">
+        <div class="project-num">02</div>
+        <div class="project-name">Villa Silencio</div>
+        <div class="project-loc">Mallorca, Spain — 2022</div>
+      </div>
+    </div>
+    <div class="project-item project-item-reveal" id="pi3" style="transition-delay:.3s">
+      <div class="project-img-wrap img-reveal-wrap" style="min-height:320px">
+        <div class="img-reveal-cover" id="pr3"></div>
+        <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;position:absolute;inset:0">
+          <rect width="800" height="450" fill="#1a1814"/>
+          <rect x="0" y="0" width="800" height="450" fill="#0a0f14"/>
+          <!-- Night museum -->
+          <rect x="100" y="100" width="600" height="320" fill="#141820"/>
+          <!-- Illuminated windows -->
+          <rect x="130" y="130" width="120" height="80" fill="#f0d870" opacity=".4"/>
+          <rect x="130" y="240" width="120" height="80" fill="#f0d870" opacity=".3"/>
+          <rect x="340" y="130" width="120" height="190" fill="#f0d870" opacity=".35"/>
+          <rect x="550" y="130" width="120" height="80" fill="#f0d870" opacity=".4"/>
+          <rect x="550" y="240" width="120" height="80" fill="#f0d870" opacity=".25"/>
+          <!-- Ground reflection -->
+          <rect x="0" y="420" width="800" height="30" fill="#1e2028" opacity=".8"/>
+          <!-- Light spills on ground -->
+          <rect x="130" y="420" width="120" height="10" fill="#f0d870" opacity=".1"/>
+          <rect x="340" y="420" width="120" height="10" fill="#f0d870" opacity=".1"/>
+          <!-- Sky -->
+          <rect x="0" y="0" width="800" height="100" fill="#0a0a10"/>
+          <circle cx="720" cy="40" r="2" fill="white" opacity=".5"/>
+          <circle cx="650" cy="25" r="1.5" fill="white" opacity=".4"/>
+          <circle cx="560" cy="60" r="1" fill="white" opacity=".3"/>
+          <circle cx="200" cy="30" r="1.5" fill="white" opacity=".4"/>
+          <circle cx="100" cy="55" r="1" fill="white" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="project-overlay"></div>
+      <div class="project-info">
+        <div class="project-num">03</div>
+        <div class="project-name">Museum of Light</div>
+        <div class="project-loc">Tokyo, Japan — 2022</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="stat-item" id="st1">
+    <div class="stat-num">127</div>
+    <div class="stat-label">Projects<br>Completed</div>
+  </div>
+  <div class="stat-item" id="st2">
+    <div class="stat-num">34</div>
+    <div class="stat-label">Countries<br>Reached</div>
+  </div>
+  <div class="stat-item" id="st3">
+    <div class="stat-num">18</div>
+    <div class="stat-label">International<br>Awards</div>
+  </div>
+  <div class="stat-item" id="st4">
+    <div class="stat-num">15+</div>
+    <div class="stat-label">Years of<br>Practice</div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="process-header">
+    <div class="process-label-wrap" id="processLabelWrap">
+      <div class="process-label-line"></div>
+      <div class="process-label">How We Work</div>
+    </div>
+    <h2 class="process-heading">
+      <span class="process-title-line" style="display:block;overflow:hidden"><span id="procw1" style="display:inline-block;transform:translateY(100%)">A methodical</span></span>
+      <span class="process-title-line" style="display:block;overflow:hidden"><span id="procw2" style="display:inline-block;transform:translateY(100%);font-style:italic">poetry</span></span>
+    </h2>
+  </div>
+  <div class="process-steps">
+    <div class="step-item" id="step1">
+      <div class="step-num">01</div>
+      <div class="step-title">Context & Discovery</div>
+      <div class="step-body">Every project begins with deep listening — to the site, the climate, the cultural landscape, and the people who will inhabit the space.</div>
+    </div>
+    <div class="step-item" id="step2">
+      <div class="step-num">02</div>
+      <div class="step-title">Concept & Vision</div>
+      <div class="step-body">We develop a singular, powerful concept that guides every decision — from the building's silhouette to the texture of a door handle.</div>
+    </div>
+    <div class="step-item" id="step3">
+      <div class="step-num">03</div>
+      <div class="step-title">Refinement & Craft</div>
+      <div class="step-body">The final phase is one of obsessive refinement. We work with master craftspeople to realize the vision with absolute precision.</div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="gallery-label" id="galLabel">Material Studies</div>
+  <div class="gallery-track-wrap">
+    <div class="gallery-track" id="galleryTrack">
+      <div class="gallery-thumb">
+        <svg viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <rect width="380" height="500" fill="#3a3530"/>
+          <rect x="0" y="0" width="380" height="500" fill="#2a2520"/>
+          <line x1="0" y1="100" x2="380" y2="100" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="0" y1="200" x2="380" y2="200" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="0" y1="300" x2="380" y2="300" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="0" y1="400" x2="380" y2="400" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="95" y1="0" x2="95" y2="500" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="190" y1="0" x2="190" y2="500" stroke="#4a4540" stroke-width=".7"/>
+          <line x1="285" y1="0" x2="285" y2="500" stroke="#4a4540" stroke-width=".7"/>
+          <rect x="20" y="20" width="340" height="460" fill="#1a1814" opacity=".3"/>
+        </svg>
+        <div class="gallery-thumb-label">Concrete Texture</div>
+      </div>
+      <div class="gallery-thumb">
+        <svg viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <rect width="380" height="500" fill="#ede9e0"/>
+          <rect x="0" y="0" width="190" height="500" fill="#e0d8c8"/>
+          <rect x="190" y="0" width="190" height="500" fill="#d4ccc0"/>
+          <line x1="190" y1="0" x2="190" y2="500" stroke="#c8c2b4" stroke-width="2"/>
+          <!-- marble veins -->
+          <path d="M 30 50 Q 120 150 180 300 Q 200 380 250 480" stroke="#c8c2b4" stroke-width="1.5" fill="none" opacity=".6"/>
+          <path d="M 80 0 Q 150 100 200 250 Q 230 350 280 500" stroke="#bfb9b0" stroke-width="1" fill="none" opacity=".4"/>
+          <path d="M 280 100 Q 320 200 360 320" stroke="#d0cbc0" stroke-width=".8" fill="none" opacity=".5"/>
+        </svg>
+        <div class="gallery-thumb-label">Calacatta Marble</div>
+      </div>
+      <div class="gallery-thumb">
+        <svg viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <rect width="380" height="500" fill="#5a4a3a"/>
+          <rect x="0" y="0" width="380" height="500" fill="#4a3a2a"/>
+          <!-- wood grain -->
+          <path d="M 0 50 Q 190 45 380 50" stroke="#5a4a38" stroke-width="2" fill="none"/>
+          <path d="M 0 80 Q 190 78 380 82" stroke="#5a4a38" stroke-width="1.5" fill="none"/>
+          <path d="M 0 110 Q 100 108 200 112 Q 300 115 380 110" stroke="#5a4a38" stroke-width="1.5" fill="none"/>
+          <path d="M 0 140 Q 190 138 380 142" stroke="#4a3a28" stroke-width="1" fill="none"/>
+          <path d="M 0 170 Q 150 168 250 172 Q 340 175 380 170" stroke="#4a3a28" stroke-width="1" fill="none"/>
+          <path d="M 0 200 Q 190 198 380 202" stroke="#5a4a38" stroke-width="1.5" fill="none"/>
+          <path d="M 0 240 Q 100 238 200 242 Q 300 245 380 240" stroke="#4a3a28" stroke-width="1" fill="none"/>
+          <path d="M 0 280 Q 190 278 380 282" stroke="#5a4a38" stroke-width="2" fill="none"/>
+          <path d="M 0 320 Q 150 318 250 322 Q 340 325 380 320" stroke="#4a3a28" stroke-width="1" fill="none"/>
+          <path d="M 0 360 Q 190 358 380 362" stroke="#5a4a38" stroke-width="1.5" fill="none"/>
+          <path d="M 0 400 Q 100 398 200 402 Q 300 405 380 400" stroke="#4a3a28" stroke-width="1" fill="none"/>
+          <path d="M 0 440 Q 190 438 380 442" stroke="#5a4a38" stroke-width="2" fill="none"/>
+          <path d="M 0 470 Q 150 468 380 472" stroke="#4a3a28" stroke-width="1" fill="none"/>
+        </svg>
+        <div class="gallery-thumb-label">Aged Teak</div>
+      </div>
+      <div class="gallery-thumb">
+        <svg viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <rect width="380" height="500" fill="#8090a0"/>
+          <rect x="0" y="0" width="380" height="500" fill="#6a7a8a" opacity=".8"/>
+          <!-- Glass reflection -->
+          <rect x="0" y="0" width="200" height="500" fill="white" opacity=".05"/>
+          <rect x="0" y="0" width="380" height="250" fill="white" opacity=".03"/>
+          <!-- grid -->
+          <line x1="127" y1="0" x2="127" y2="500" stroke="white" stroke-width=".8" opacity=".3"/>
+          <line x1="253" y1="0" x2="253" y2="500" stroke="white" stroke-width=".8" opacity=".3"/>
+          <line x1="0" y1="167" x2="380" y2="167" stroke="white" stroke-width=".8" opacity=".3"/>
+          <line x1="0" y1="333" x2="380" y2="333" stroke="white" stroke-width=".8" opacity=".3"/>
+          <!-- specular -->
+          <rect x="20" y="20" width="60" height="200" fill="white" opacity=".08" rx="2"/>
+        </svg>
+        <div class="gallery-thumb-label">Structural Glass</div>
+      </div>
+      <div class="gallery-thumb">
+        <svg viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+          <rect width="380" height="500" fill="#c8a070"/>
+          <rect x="0" y="0" width="380" height="500" fill="#b89060"/>
+          <!-- Brick pattern -->
+          <rect x="0" y="0" width="380" height="50" fill="#c09870" rx="0"/>
+          <rect x="25" y="52" width="330" height="48" fill="#b88858" rx="0"/>
+          <rect x="0" y="102" width="380" height="48" fill="#c09870" rx="0"/>
+          <rect x="25" y="152" width="330" height="48" fill="#b88858" rx="0"/>
+          <rect x="0" y="202" width="380" height="48" fill="#c09870" rx="0"/>
+          <rect x="25" y="252" width="330" height="48" fill="#b88858" rx="0"/>
+          <rect x="0" y="302" width="380" height="48" fill="#c09870" rx="0"/>
+          <rect x="25" y="352" width="330" height="48" fill="#b88858" rx="0"/>
+          <rect x="0" y="402" width="380" height="48" fill="#c09870" rx="0"/>
+          <rect x="25" y="452" width="330" height="48" fill="#b88858" rx="0"/>
+          <!-- mortar lines -->
+          <rect x="0" y="50" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="100" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="150" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="200" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="250" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="300" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="350" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="400" width="380" height="2" fill="#a08050" opacity=".5"/>
+          <rect x="0" y="450" width="380" height="2" fill="#a08050" opacity=".5"/>
+        </svg>
+        <div class="gallery-thumb-label">Handmade Brick</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-label" id="contactLabel">Start a Conversation</div>
+    <h2 class="contact-title">
+      <span class="contact-title-line"><span class="contact-title-word" id="ctw1">Let's</span> <span class="contact-title-word" id="ctw2">build</span></span>
+      <span class="contact-title-line"><span class="contact-title-word" id="ctw3">something</span></span>
+      <span class="contact-title-line"><span class="contact-title-word" id="ctw4" style="font-style:italic">enduring</span></span>
+    </h2>
+    <div class="contact-email" id="contactEmail">studio@forma.design</div>
+    <a href="#" class="contact-btn magnetic" id="contactBtn">
+      Begin a Project <span class="contact-btn-arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Forma</div>
+  <div class="footer-copy">© 2024 Forma Architecture Studio</div>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">Careers</a>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+// Cursor
+const cursor = document.getElementById('cursor');
+const follower = document.getElementById('cursor-follower');
+let mouseX=0,mouseY=0,followerX=0,followerY=0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  gsap.to(cursor, {x:mouseX,y:mouseY,duration:.08,ease:'none'});
+});
+
+function animateFollower(){
+  followerX += (mouseX-followerX)*.09;
+  followerY += (mouseY-followerY)*.09;
+  follower.style.left = followerX+'px';
+  follower.style.top = followerY+'px';
+  requestAnimationFrame(animateFollower);
+}
+animateFollower();
+
+document.querySelectorAll('a,button,.project-item,.gallery-thumb,.contact-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    gsap.to(cursor,{width:60,height:60,duration:.5,ease:'power2.out'});
+    gsap.to(follower,{opacity:0,duration:.3});
+  });
+  el.addEventListener('mouseleave',()=>{
+    gsap.to(cursor,{width:8,height:8,duration:.5,ease:'power2.out'});
+    gsap.to(follower,{opacity:1,duration:.3});
+  });
+});
+
+// Magnetic buttons
+document.querySelectorAll('.magnetic').forEach(btn=>{
+  btn.addEventListener('mousemove', e=>{
+    const r = btn.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width/2;
+    const y = e.clientY - r.top - r.height/2;
+    gsap.to(btn,{x:x*.2,y:y*.2,duration:.6,ease:'power3.out'});
+  });
+  btn.addEventListener('mouseleave', ()=>{
+    gsap.to(btn,{x:0,y:0,duration:.8,ease:'elastic.out(1,.4)'});
+  });
+});
+
+// LOADER
+const loader = document.getElementById('loader');
+const loaderBar = document.getElementById('loaderBar');
+const loaderPct = document.getElementById('loaderPct');
+const loaderLogo = document.querySelector('.loader-logo');
+
+const loaderTl = gsap.timeline({onComplete:initPage});
+loaderTl
+  .to(loaderLogo,{opacity:1,duration:1.2,ease:'power2.out'})
+  .to(loaderBar,{width:'100%',duration:2,ease:'power2.inOut'},'-=.5')
+  .to(loaderPct,{innerHTML:100,snap:{innerHTML:1},duration:2,ease:'power2.inOut'},'-=2')
+  .to(loaderLogo,{opacity:0,duration:.6,ease:'power2.in'},'-=.3')
+  .to(loader,{yPercent:-100,duration:1.4,ease:'power4.inOut'});
+
+function initPage(){
+  loader.style.display='none';
+  // NAV
+  gsap.to('#main-nav',{opacity:1,duration:1.2,ease:'power2.out'});
+  
+  // HERO ANIMATION
+  const heroTl = gsap.timeline({delay:.2});
+  heroTl
+    .to('#heroEyebrow',{opacity:1,y:0,duration:1.4,ease:'power3.out'})
+    .to('#hw1',{y:'0%',opacity:1,duration:1.6,ease:'power4.out'},'-=.8')
+    .to('#hw2',{y:'0%',opacity:1,duration:1.6,ease:'power4.out'},'-=1.1')
+    .to('#hw3',{y:'0%',opacity:1,duration:1.6,ease:'power4.out'},'-=1.2')
+    .to('#heroSubtitle',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'-=.8')
+    .to('#heroScrollHint',{opacity:1,duration:1,ease:'power2.out'},'-=.5');
+  
+  // HERO PARALLAX + SCROLL
+  gsap.to('#heroBg',{
+    yPercent:-15,
+    ease:'none',
+    scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1.5}
+  });
+  gsap.to('#heroContent',{
+    yPercent:20,
+    opacity:0,
+    scale:.95,
+    ease:'none',
+    scrollTrigger:{trigger:'#hero',start:'20% top',end:'bottom top',scrub:1.2}
+  });
+  
+  // MARQUEE
+  const mTrack = document.getElementById('marqueeTrack');
+  const mWidth = mTrack.scrollWidth/2;
+  gsap.to(mTrack,{x:-mWidth,duration:35,ease:'none',repeat:-1,modifiers:{x:x=>parseFloat(x)%mWidth+'px'}});
+  
+  // VISION SECTION
+  ScrollTrigger.create({
+    trigger:'#vision',
+    start:'top 70%',
+    onEnter:()=>{
+      const vTl = gsap.timeline();
+      vTl
+        .to('#visionLabel',{opacity:1,y:0,duration:1.2,ease:'power3.out'})
+        .to(['#vw1','#vw2','#vw3','#vw4','#vw5'],{y:'0%',duration:1.5,ease:'power4.out',stagger:.12},'-=.7')
+        .to('#visionBody',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'-=.8')
+        .to('#visionCta',{opacity:1,y:0,duration:1,ease:'power3.out'},'-=.6');
+      gsap.to('#visionImgCover',{scaleX:0,duration:1.8,ease:'power4.inOut',delay:.3});
+      gsap.to('#visionImg',{scale:1,duration:2.5,ease:'power3.out',delay:.5});
+    }
+  });
+  
+  gsap.to('.vision-img-wrap svg',{
+    yPercent:-8,
+    ease:'none',
+    scrollTrigger:{trigger:'#vision',start:'top bottom',end:'bottom top',scrub:1.5}
+  });
+  
+  // PIN SECTION
+  const phases = ['#phase1','#phase2','#phase3'];
+  const dots = ['#pd1','#pd2','#pd3'];
+  
+  ScrollTrigger.create({
+    trigger:'#pin-section',
+    start:'top top',
+    end:'bottom bottom',
+    scrub:true,
+    onUpdate:(self)=>{
+      const p = self.progress;
+      let active = p < .33 ? 0 : p < .66 ? 1 : 2;
+      phases.forEach((ph,i)=>{
+        const el = document.querySelector(ph);
+        if(i===active){
+          gsap.to(el,{opacity:1,y:0,duration:.8,ease:'power3.out'});
+        } else {
+          gsap.to(el,{opacity:0,y:i<active?-30:30,duration:.6,ease:'power3.in'});
+        }
+        document.querySelector(dots[i]).classList.toggle('active',i===active);
+      });
+    }
+  });
+  // Show first phase
+  gsap.set('#phase1',{opacity:1,y:0});
+  
+  // PROJECTS
+  ScrollTrigger.create({
+    trigger:'#projects',
+    start:'top 75%',
+    onEnter:()=>{
+      gsap.to('#projLabel',{opacity:1,y:0,duration:1,ease:'power3.out'});
+      gsap.to(['#ptw1','#ptw2'],{y:'0%',duration:1.6,ease:'power4.out',stagger:.12,delay:.2});
+      
+      document.querySelectorAll('[id^="pr"]').forEach((cover,i)=>{
+        gsap.to(cover,{scaleX:0,duration:1.8,ease:'power4.inOut',delay:.4+i*.2});
+      });
+      gsap.to('.project-item-reveal',{opacity:1,y:0,duration:1.4,ease:'power3.out',stagger:.15,delay:.3});
+    }
+  });
+  
+  // STATS
+  ScrollTrigger.create({
+    trigger:'#stats',
+    start:'top 75%',
+    onEnter:()=>{
+      gsap.to('.stat-item',{opacity:1,y:0,duration:1.2,ease:'power3.out',stagger:.15});
+    }
+  });
+  
+  // PROCESS
+  ScrollTrigger.create({
+    trigger:'#process',
+    start:'top 70%',
+    onEnter:()=>{
+      gsap.to('#processLabelWrap',{opacity:1,y:0,duration:1,ease:'power3.out'});
+      gsap.to(['#procw1','#procw2'],{y:'0%',duration:1.6,ease:'power4.out',stagger:.2,delay:.2});
+      gsap.to('.step-item',{opacity:1,y:0,duration:1.2,ease:'power3.out',stagger:.2,delay:.4});
+    }
+  });
+  
+  // GALLERY AUTO-SCROLL
+  ScrollTrigger.create({
+    trigger:'#gallery',
+    start:'top 80%',
+    onEnter:()=>{
+      gsap.to('#galLabel',{opacity:1,y:0,duration:1,ease:'power3.out'});
+    }
+  });
+  
+  gsap.to('#galleryTrack',{
+    x:'-40%',
+    ease:'none',
+    scrollTrigger:{trigger:'#gallery',start:'top bottom',end:'bottom top',scrub:1.5}
+  });
+  
+  // CONTACT
+  ScrollTrigger.create({
+    trigger:'#contact',
+    start:'top 70%',
+    onEnter:()=>{
+      gsap.to('#contactLabel',{opacity:1,y:0,duration:1,ease:'power3.out'});
+      gsap.to(['#ctw1','#ctw2','#ctw3','#ctw4'],{y:'0%',duration:1.6,ease:'power4.out',stagger:.14,delay:.2});
+      gsap.to('#contactEmail',{opacity:1,y:0,duration:1,ease:'power3.out',delay:.6});
+      gsap.to('#contactBtn',{opacity:1,y:0,duration:1,ease:'power3.out',delay:.8});
+    }
+  });
+}
+</script>
+</body>
+</html>
