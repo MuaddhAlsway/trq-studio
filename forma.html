@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA — Architecture & Interior Design Studio</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Owners+Text:ital,wght@0,400;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+
+<!-- GSAP CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/SplitText.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES — DESIGN SYSTEM
+═══════════════════════════════════════════════ */
+:root {
+  --bone:      #F0EBE1;
+  --ink:       #0E0D0B;
+  --warm-gray: #9B9289;
+  --rust:      #B85C38;
+  --gold:      #C9A96E;
+  --off-white: #F7F4EF;
+  --dark-bg:   #111009;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui:      'Syne', sans-serif;
+  --font-body:    'Cormorant Garamond', Georgia, serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: clamp(14px, 1.1vw, 17px);
+  scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+img { display: block; width: 100%; height: 100%; object-fit: cover; }
+a { text-decoration: none; color: inherit; }
+button { cursor: none; background: none; border: none; }
+
+/* ═══════════════════════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════════════════════ */
+#cursor {
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+
+#cursor-dot {
+  width: 8px; height: 8px;
+  background: var(--bone);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo), background 0.3s;
+}
+
+#cursor-ring {
+  width: 40px; height: 40px;
+  border: 1px solid rgba(240,235,225,0.5);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.5s var(--ease-out-expo), height 0.5s var(--ease-out-expo), border-color 0.3s;
+}
+
+body.cursor-hover #cursor-dot { width: 0px; height: 0px; }
+body.cursor-hover #cursor-ring { width: 70px; height: 70px; border-color: var(--bone); }
+body.cursor-view #cursor-ring { width: 90px; height: 90px; }
+body.cursor-view #cursor-dot { width: 4px; height: 4px; }
+
+#cursor-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0;
+  color: var(--bone);
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}
+
+body.cursor-view #cursor-label { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   PRELOADER
+═══════════════════════════════════════════════ */
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.preloader-logo {
+  font-family: var(--font-ui);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: var(--bone);
+  opacity: 0;
+}
+
+.preloader-counter {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 300;
+  color: var(--bone);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.preloader-bar-wrap {
+  width: clamp(200px, 30vw, 400px);
+  height: 1px;
+  background: rgba(240,235,225,0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.preloader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  transition: width 0.05s linear;
+}
+
+.preloader-tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--warm-gray);
+  letter-spacing: 0.05em;
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 800;
+  padding: 2.5rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  mix-blend-mode: difference;
+  opacity: 0;
+}
+
+.nav-logo {
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  color: var(--bone);
+}
+
+.nav-links {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--bone);
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--bone);
+  transition: width 0.4s var(--ease-out-expo);
+}
+
+.nav-links a:hover::after { width: 100%; }
+
+.nav-menu-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px;
+  position: relative;
+}
+
+.nav-menu-btn span {
+  display: block;
+  width: 28px; height: 1px;
+  background: var(--bone);
+  transition: transform 0.4s var(--ease-out-expo), opacity 0.3s, width 0.4s var(--ease-out-expo);
+}
+
+.nav-menu-btn span:nth-child(2) { width: 18px; }
+.nav-menu-btn.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); width: 28px; }
+.nav-menu-btn.open span:nth-child(2) { opacity: 0; transform: translateX(-8px); }
+.nav-menu-btn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* FULLSCREEN MENU */
+#fullscreen-menu {
+  position: fixed;
+  inset: 0;
+  background: var(--dark-bg);
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 4rem;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s var(--ease-in-out-circ);
+}
+
+#fullscreen-menu.open { clip-path: inset(0 0 0% 0); }
+
+.menu-nav-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.menu-nav-item {
+  overflow: hidden;
+}
+
+.menu-nav-item a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 300;
+  color: var(--bone);
+  line-height: 1.05;
+  transform: translateY(110%);
+  transition: transform 0.7s var(--ease-out-expo), color 0.3s;
+  display: block;
+}
+
+#fullscreen-menu.open .menu-nav-item a {
+  transform: translateY(0);
+}
+
+.menu-nav-item:nth-child(1) a { transition-delay: 0.05s; }
+.menu-nav-item:nth-child(2) a { transition-delay: 0.1s; }
+.menu-nav-item:nth-child(3) a { transition-delay: 0.15s; }
+.menu-nav-item:nth-child(4) a { transition-delay: 0.2s; }
+.menu-nav-item:nth-child(5) a { transition-delay: 0.25s; }
+.menu-nav-item:nth-child(6) a { transition-delay: 0.3s; }
+
+.menu-nav-item a:hover { color: var(--gold); }
+
+.menu-item-num {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--warm-gray);
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.menu-footer {
+  position: absolute;
+  bottom: 4rem;
+  left: 4rem;
+  right: 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.menu-address {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--warm-gray);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.menu-socials {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.menu-socials a {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  transition: color 0.3s;
+}
+
+.menu-socials a:hover { color: var(--bone); }
+
+/* ═══════════════════════════════════════════════
+   SECTION SHARED
+═══════════════════════════════════════════════ */
+section { position: relative; }
+
+.section-label {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-label::before {
+  content: '';
+  display: inline-block;
+  width: 40px; height: 1px;
+  background: var(--warm-gray);
+}
+
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+#hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 4rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Simulated cinematic architectural render using CSS gradients */
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at 70% 40%, rgba(185,130,80,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 20% 80%, rgba(14,13,11,0.8) 0%, transparent 70%),
+    linear-gradient(160deg, #1a1712 0%, #0E0D0B 40%, #151310 100%);
+  z-index: 1;
+}
+
+/* Geometric architectural lines */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(201,169,110,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,169,110,0.06) 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: 2;
+  mask-image: radial-gradient(ellipse 70% 70% at 65% 35%, black 30%, transparent 70%);
+}
+
+.hero-structure {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+}
+
+/* Architectural vertical line */
+.hero-line-v {
+  position: absolute;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(201,169,110,0.4), transparent);
+  top: 0; bottom: 0;
+}
+
+.hero-line-v:nth-child(1) { left: 62%; height: 100%; animation: linePulse 4s ease-in-out infinite; }
+.hero-line-v:nth-child(2) { left: 55%; opacity: 0.3; animation: linePulse 4s ease-in-out infinite 1s; }
+
+.hero-line-h {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,169,110,0.3), transparent);
+  left: 0; right: 0;
+}
+
+.hero-line-h:nth-child(3) { top: 35%; animation: linePulseH 5s ease-in-out infinite 0.5s; }
+.hero-line-h:nth-child(4) { top: 68%; opacity: 0.2; animation: linePulseH 5s ease-in-out infinite 1.5s; }
+
+@keyframes linePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.15; }
+}
+@keyframes linePulseH {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.08; }
+}
+
+/* Abstract building silhouette */
+.hero-silhouette {
+  position: absolute;
+  right: 6%;
+  bottom: 0;
+  width: 38%;
+  height: 90%;
+  z-index: 3;
+  opacity: 0.07;
+}
+
+.hero-silhouette svg {
+  width: 100%; height: 100%;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+}
+
+.hero-top-row {
+  position: absolute;
+  top: 2rem;
+  left: 4rem;
+  right: 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 10;
+}
+
+.hero-year {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--warm-gray);
+}
+
+.hero-scroll-hint {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--warm-gray);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hero-scroll-line {
+  width: 60px;
+  height: 1px;
+  background: var(--warm-gray);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: var(--gold);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+
+@keyframes scrollLine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.hero-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 9vw, 9rem);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--bone);
+  margin-bottom: 3rem;
+  max-width: 70%;
+}
+
+.hero-headline em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-bottom-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.hero-tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--warm-gray);
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone);
+  transition: gap 0.4s var(--ease-out-expo);
+}
+
+.hero-cta:hover { gap: 2.5rem; }
+
+.hero-cta-arrow {
+  width: 50px; height: 1px;
+  background: var(--bone);
+  position: relative;
+  flex-shrink: 0;
+  transition: width 0.4s var(--ease-out-expo);
+}
+
+.hero-cta:hover .hero-cta-arrow { width: 70px; }
+
+.hero-cta-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -3px;
+  width: 7px; height: 7px;
+  border-right: 1px solid var(--bone);
+  border-top: 1px solid var(--bone);
+  transform: rotate(45deg);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.hero-scroll-indicator span {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  writing-mode: vertical-rl;
+}
+
+.scroll-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: scrollBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(12px); opacity: 0.3; }
+}
+
+/* ═══════════════════════════════════════════════
+   MARQUEE STRIP
+═══════════════════════════════════════════════ */
+.marquee-strip {
+  padding: 1.2rem 0;
+  background: var(--gold);
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  z-index: 10;
+}
+
+.marquee-track {
+  display: inline-flex;
+  animation: marqueeScroll 20s linear infinite;
+}
+
+.marquee-item {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 0 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.marquee-item::after {
+  content: '◆';
+  font-size: 0.4rem;
+  opacity: 0.6;
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════════
+   ABOUT SECTION
+═══════════════════════════════════════════════ */
+#about {
+  padding: 10rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  align-items: center;
+  background: var(--ink);
+}
+
+.about-left {
+  position: relative;
+}
+
+.about-image-main {
+  aspect-ratio: 3/4;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-image-main-inner {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #1c1a15 0%, #2a2520 30%, #1a1710 60%, #131108 100%);
+  position: relative;
+}
+
+/* Simulated architectural photo with CSS */
+.about-image-main-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, transparent 30%, rgba(201,169,110,0.05) 50%, transparent 70%),
+    repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(201,169,110,0.04) 50px),
+    repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(201,169,110,0.04) 50px);
+}
+
+.about-image-main-inner::after {
+  content: 'FORMA';
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  font-family: var(--font-ui);
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  color: rgba(201,169,110,0.4);
+  writing-mode: vertical-rl;
+}
+
+.about-img-accent {
+  position: absolute;
+  bottom: -3rem;
+  right: -3rem;
+  width: 55%;
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #1f1c16 0%, #2d2820 100%);
+  border: 1px solid rgba(201,169,110,0.12);
+  overflow: hidden;
+}
+
+.about-img-accent::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 40%, rgba(201,169,110,0.08), transparent 70%);
+}
+
+.about-year-badge {
+  position: absolute;
+  top: -2rem;
+  left: -2rem;
+  width: 90px; height: 90px;
+  border: 1px solid rgba(201,169,110,0.3);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+}
+
+.about-year-badge span:first-child {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.about-year-badge span:last-child {
+  font-family: var(--font-ui);
+  font-size: 0.45rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+}
+
+.about-right {}
+
+.about-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--bone);
+  margin: 1.5rem 0 2.5rem;
+}
+
+.about-headline em { font-style: italic; color: var(--gold); }
+
+.about-body {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: var(--warm-gray);
+  margin-bottom: 3rem;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(240,235,225,0.08);
+}
+
+.stat-item {}
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  font-weight: 300;
+  color: var(--bone);
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.stat-num sup {
+  font-size: 0.5em;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.stat-label {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  margin-top: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════
+   PROJECTS SECTION
+═══════════════════════════════════════════════ */
+#projects {
+  padding: 8rem 4rem;
+  background: var(--ink);
+}
+
+.projects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 5rem;
+}
+
+.projects-headline {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--bone);
+  margin-top: 1rem;
+}
+
+.projects-headline em { font-style: italic; color: var(--gold); }
+
+.projects-view-all {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: color 0.3s;
+}
+
+.projects-view-all:hover { color: var(--bone); }
+
+.projects-view-all::after {
+  content: '→';
+  font-size: 1rem;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.projects-view-all:hover::after { transform: translateX(5px); }
+
+/* Project List Layout */
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.project-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 2fr 80px;
+  align-items: center;
+  gap: 3rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(240,235,225,0.08);
+  cursor: none;
+  transition: background 0.4s;
+  position: relative;
+}
+
+.project-item:last-child { border-bottom: 1px solid rgba(240,235,225,0.08); }
+
+.project-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(201,169,110,0.03);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.project-item:hover::before { opacity: 1; }
+
+.project-num {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--warm-gray);
+  font-style: italic;
+}
+
+.project-meta {}
+
+.project-category {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  margin-bottom: 0.4rem;
+}
+
+.project-location {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: rgba(240,235,225,0.4);
+}
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 2.5vw, 2.5rem);
+  font-weight: 300;
+  color: var(--bone);
+  line-height: 1.1;
+  transition: color 0.3s;
+}
+
+.project-item:hover .project-title { color: var(--gold); }
+
+.project-year {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--warm-gray);
+  text-align: right;
+}
+
+/* Hover preview image */
+.project-preview {
+  position: fixed;
+  width: 280px;
+  aspect-ratio: 4/3;
+  pointer-events: none;
+  z-index: 500;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+  border: 1px solid rgba(201,169,110,0.2);
+}
+
+.project-preview.active { opacity: 1; transform: scale(1); }
+
+.project-preview-inner {
+  width: 100%; height: 100%;
+}
+
+.preview-bg-1 { background: linear-gradient(135deg, #1e1c16, #2a2218, #1a1610); }
+.preview-bg-2 { background: linear-gradient(135deg, #16191e, #18202a, #101416); }
+.preview-bg-3 { background: linear-gradient(135deg, #1e1a16, #251f18, #1a1510); }
+.preview-bg-4 { background: linear-gradient(135deg, #18191e, #1e2025, #121418); }
+.preview-bg-5 { background: linear-gradient(135deg, #1c1a18, #232118, #181610); }
+
+.project-preview-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(201,169,110,0.1), transparent 70%);
+}
+
+.project-preview-label {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+}
+
+/* ═══════════════════════════════════════════════
+   SERVICES SECTION
+═══════════════════════════════════════════════ */
+#services {
+  padding: 10rem 4rem;
+  background: var(--off-white);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+#services::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 120px;
+  background: var(--ink);
+  clip-path: polygon(0 0, 100% 0, 100% 40%, 0 100%);
+}
+
+.services-bg-text {
+  position: absolute;
+  bottom: -3rem;
+  right: -2rem;
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 15vw, 15rem);
+  font-weight: 300;
+  color: rgba(14,13,11,0.04);
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.services-header {
+  margin-bottom: 6rem;
+}
+
+.services-headline {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-top: 1.5rem;
+  max-width: 600px;
+}
+
+.services-headline em { font-style: italic; color: var(--rust); }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.service-card {
+  background: var(--bone);
+  padding: 3rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.5s var(--ease-out-expo);
+}
+
+.service-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: translateY(100%);
+  transition: transform 0.6s var(--ease-out-expo);
+  z-index: 0;
+}
+
+.service-card:hover::after { transform: translateY(0); }
+
+.service-card-content { position: relative; z-index: 1; }
+
+.service-num {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 300;
+  color: rgba(14,13,11,0.08);
+  line-height: 1;
+  margin-bottom: 2rem;
+  transition: color 0.5s;
+}
+
+.service-card:hover .service-num { color: rgba(240,235,225,0.08); }
+
+.service-icon {
+  width: 36px; height: 36px;
+  margin-bottom: 2rem;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.service-card:hover .service-icon { opacity: 1; }
+
+.service-icon svg { width: 100%; height: 100%; }
+
+.service-card:hover .service-icon svg path,
+.service-card:hover .service-icon svg rect,
+.service-card:hover .service-icon svg circle { stroke: var(--bone); }
+
+.service-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: 1rem;
+  transition: color 0.5s;
+  line-height: 1.2;
+}
+
+.service-card:hover .service-name { color: var(--bone); }
+
+.service-desc {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--warm-gray);
+  transition: color 0.5s;
+}
+
+.service-card:hover .service-desc { color: rgba(240,235,225,0.55); }
+
+.service-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: color 0.5s, gap 0.3s;
+}
+
+.service-link::after {
+  content: '→';
+  font-size: 0.9rem;
+  transition: transform 0.3s;
+}
+
+.service-card:hover .service-link { color: var(--gold); gap: 1.25rem; }
+.service-card:hover .service-link::after { transform: translateX(4px); }
+
+/* ═══════════════════════════════════════════════
+   PROCESS SECTION
+═══════════════════════════════════════════════ */
+#process {
+  padding: 10rem 4rem;
+  background: var(--dark-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.process-header {
+  max-width: 500px;
+  margin-bottom: 7rem;
+}
+
+.process-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--bone);
+  margin-top: 1.5rem;
+}
+
+.process-headline em { font-style: italic; color: var(--gold); }
+
+.process-steps {
+  position: relative;
+}
+
+.process-steps::before {
+  content: '';
+  position: absolute;
+  left: 2.5rem;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(201,169,110,0.3), transparent);
+}
+
+.process-step {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 4rem;
+  padding: 3rem 0;
+  position: relative;
+}
+
+.process-step-dot {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.3rem;
+}
+
+.process-step-dot-inner {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.process-step:hover .process-step-dot-inner { background: var(--gold); }
+
+.process-step-dot-inner::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,169,110,0.2);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.process-step:hover .process-step-dot-inner::after { opacity: 1; }
+
+.process-step-num {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+
+.process-step-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 300;
+  color: var(--bone);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.process-step-desc {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--warm-gray);
+  max-width: 500px;
+}
+
+.process-step-detail {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.process-tag {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(201,169,110,0.6);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(201,169,110,0.2);
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.process-step:hover .process-tag { border-color: rgba(201,169,110,0.5); color: var(--gold); }
+
+/* ═══════════════════════════════════════════════
+   AWARDS SECTION
+═══════════════════════════════════════════════ */
+#awards {
+  padding: 8rem 4rem;
+  background: var(--bone);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.awards-headline {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 7rem);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--ink);
+  margin: 1.5rem 0 5rem;
+}
+
+.awards-headline em { font-style: italic; }
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(14,13,11,0.1);
+}
+
+.award-item {
+  background: var(--bone);
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+
+.award-item:hover { background: var(--ink); }
+
+.award-year {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--warm-gray);
+  margin-bottom: 1.5rem;
+  transition: color 0.4s;
+}
+
+.award-item:hover .award-year { color: rgba(201,169,110,0.6); }
+
+.award-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  transition: color 0.4s;
+}
+
+.award-item:hover .award-name { color: var(--bone); }
+
+.award-project {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--warm-gray);
+  transition: color 0.4s;
+}
+
+.award-item:hover .award-project { color: var(--gold); }
+
+.award-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.award-item:hover .award-badge { opacity: 1; transform: scale(1); }
+
+/* ═══════════════════════════════════════════════
+   QUOTE SECTION
+═══════════════════════════════════════════════ */
+#quote {
+  padding: 10rem 4rem;
+  background: var(--dark-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#quote::before {
+  content: '❝';
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 30vw;
+  color: rgba(201,169,110,0.03);
+  line-height: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.quote-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.5vw, 3.5rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--bone);
+  line-height: 1.4;
+  max-width: 900px;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-text em { color: var(--gold); font-style: normal; }
+
+.quote-author {
+  margin-top: 3rem;
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+}
+
+/* ═══════════════════════════════════════════════
+   CONTACT SECTION
+═══════════════════════════════════════════════ */
+#contact {
+  padding: 10rem 4rem;
+  background: var(--bone);
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rem;
+  align-items: start;
+}
+
+.contact-left {}
+
+.contact-headline {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 300;
+  line-height: 0.95;
+  color: var(--ink);
+  margin: 1.5rem 0 2.5rem;
+}
+
+.contact-headline em { font-style: italic; color: var(--rust); }
+
+.contact-body {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--warm-gray);
+  margin-bottom: 3rem;
+}
+
+.contact-info-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.contact-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(14,13,11,0.1);
+}
+
+.contact-info-item:last-child { border-bottom: 1px solid rgba(14,13,11,0.1); }
+
+.contact-info-label {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+}
+
+.contact-info-value {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--ink);
+  transition: color 0.3s;
+}
+
+.contact-info-value a:hover { color: var(--rust); }
+
+.contact-right {}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.form-group {
+  position: relative;
+  border-top: 1px solid rgba(14,13,11,0.15);
+}
+
+.form-group:last-of-type { border-bottom: 1px solid rgba(14,13,11,0.15); margin-bottom: 2.5rem; }
+
+.form-group label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--warm-gray);
+  padding: 1.2rem 0 0.4rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--ink);
+  padding: 0.4rem 0 1.2rem;
+  resize: none;
+  cursor: none;
+  -webkit-appearance: none;
+}
+
+.form-group textarea { min-height: 100px; }
+
+.form-group::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 0; height: 1px;
+  background: var(--ink);
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.form-group:focus-within::after { width: 100%; }
+
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone);
+  background: var(--ink);
+  padding: 1.5rem 3rem;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.5s;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--rust);
+  transform: translateX(-100%);
+  transition: transform 0.5s var(--ease-out-expo);
+}
+
+.submit-btn:hover::before { transform: translateX(0); }
+
+.submit-btn span { position: relative; z-index: 1; }
+.submit-btn .btn-arrow { position: relative; z-index: 1; transition: transform 0.3s; }
+.submit-btn:hover .btn-arrow { transform: translateX(5px); }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+footer {
+  padding: 4rem;
+  background: var(--ink);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  border-top: 1px solid rgba(240,235,225,0.06);
+}
+
+.footer-logo {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: var(--bone);
+}
+
+.footer-tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--warm-gray);
+  text-align: center;
+}
+
+.footer-right {
+  text-align: right;
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(155,146,137,0.5);
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLL PROGRESS
+═══════════════════════════════════════════════ */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--gold);
+  z-index: 9000;
+  width: 0%;
+  transition: width 0.1s;
+}
+
+/* ═══════════════════════════════════════════════
+   GSAP ANIMATION INITIAL STATES
+═══════════════════════════════════════════════ */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.reveal-fade {
+  opacity: 0;
+}
+
+.clip-reveal {
+  clip-path: inset(0 100% 0 0);
+}
+
+/* ═══════════════════════════════════════════════
+   SMOOTH SCROLL & MISC
+═══════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+::selection { background: var(--gold); color: var(--ink); }
+
+/* Magnetic button effect container */
+.magnetic {
+  display: inline-block;
+  position: relative;
+}
+
+/* Image parallax wrapper */
+.parallax-img-wrap {
+  overflow: hidden;
+}
+
+.parallax-img-inner {
+  transform: scale(1.15);
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  nav { padding: 1.5rem 2rem; }
+  #about { grid-template-columns: 1fr; gap: 4rem; padding: 6rem 2rem; }
+  .about-img-accent { display: none; }
+  #projects { padding: 6rem 2rem; }
+  .project-item { grid-template-columns: 50px 1fr; gap: 1.5rem; }
+  .project-meta, .project-year { display: none; }
+  .services-grid { grid-template-columns: 1fr; }
+  #services { padding: 6rem 2rem; }
+  #process { padding: 6rem 2rem; }
+  .awards-grid { grid-template-columns: repeat(2, 1fr); }
+  #awards { padding: 6rem 2rem; }
+  #contact { grid-template-columns: 1fr; gap: 4rem; padding: 6rem 2rem; }
+  #hero { padding: 0 2rem 3rem; }
+  .hero-top-row { left: 2rem; right: 2rem; }
+  .hero-headline { max-width: 100%; }
+  footer { grid-template-columns: 1fr; gap: 1rem; text-align: center; padding: 3rem 2rem; }
+  .footer-right { text-align: center; }
+  .nav-links { display: none; }
+  #fullscreen-menu { padding: 6rem 2rem; }
+  .menu-footer { left: 2rem; right: 2rem; bottom: 2rem; flex-direction: column; gap: 2rem; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor">
+  <div id="cursor-ring"></div>
+  <div id="cursor-dot"></div>
+  <div id="cursor-label">VIEW</div>
+</div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="preloader-logo">FORMA</div>
+  <div class="preloader-counter">0</div>
+  <div class="preloader-bar-wrap">
+    <div class="preloader-bar" id="preloader-bar"></div>
+  </div>
+  <div class="preloader-tagline">Architecture & Interior Design Studio</div>
+</div>
+
+<!-- FULLSCREEN MENU -->
+<div id="fullscreen-menu">
+  <ul class="menu-nav-items">
+    <li class="menu-nav-item"><a href="#hero"><span class="menu-item-num">01</span> Home</a></li>
+    <li class="menu-nav-item"><a href="#about"><span class="menu-item-num">02</span> Studio</a></li>
+    <li class="menu-nav-item"><a href="#projects"><span class="menu-item-num">03</span> Work</a></li>
+    <li class="menu-nav-item"><a href="#services"><span class="menu-item-num">04</span> Services</a></li>
+    <li class="menu-nav-item"><a href="#process"><span class="menu-item-num">05</span> Process</a></li>
+    <li class="menu-nav-item"><a href="#contact"><span class="menu-item-num">06</span> Contact</a></li>
+  </ul>
+  <div class="menu-footer">
+    <div class="menu-address">
+      Studio FORMA<br>
+      <em>28 Rue du Faubourg Saint-Honoré<br>
+      Paris, 75008</em>
+    </div>
+    <ul class="menu-socials">
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Pinterest</a></li>
+      <li><a href="#">LinkedIn</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="main-nav">
+  <a href="#hero" class="nav-logo">FORMA</a>
+  <ul class="nav-links">
+    <li><a href="#about">Studio</a></li>
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-menu-btn magnetic" id="menu-toggle" aria-label="Open menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- HERO SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-structure">
+      <div class="hero-line-v"></div>
+      <div class="hero-line-v"></div>
+      <div class="hero-line-h"></div>
+      <div class="hero-line-h"></div>
+    </div>
+    <div class="hero-silhouette">
+      <svg viewBox="0 0 300 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="100" width="180" height="400" fill="white"/>
+        <rect x="100" y="60" width="100" height="440" fill="white"/>
+        <rect x="80" y="200" width="20" height="60" fill="black"/>
+        <rect x="120" y="200" width="20" height="60" fill="black"/>
+        <rect x="160" y="200" width="20" height="60" fill="black"/>
+        <rect x="200" y="200" width="20" height="60" fill="black"/>
+        <rect x="80" y="300" width="20" height="60" fill="black"/>
+        <rect x="120" y="300" width="20" height="60" fill="black"/>
+        <rect x="160" y="300" width="20" height="60" fill="black"/>
+        <rect x="200" y="300" width="20" height="60" fill="black"/>
+        <rect x="120" y="380" width="60" height="120" fill="black"/>
+        <rect x="60" y="100" width="180" height="4" fill="white" opacity="0.5"/>
+        <rect x="100" y="60" width="100" height="4" fill="white" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-top-row">
+    <div class="hero-year">Est. MMIX — Paris</div>
+    <div class="hero-scroll-hint">
+      <div class="hero-scroll-line"></div>
+      Scroll to explore
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal-up">Architecture & Interior Design</div>
+    <h1 class="hero-headline">
+      <span class="split-text">Where Space</span><br>
+      <span class="split-text"><em>Becomes</em> Art</span>
+    </h1>
+    <div class="hero-bottom-row">
+      <p class="hero-tagline reveal-up">We design spaces that transcend function — spaces that resonate, inspire, and endure through generations.</p>
+      <a href="#projects" class="hero-cta magnetic reveal-up">
+        View Our Work
+        <span class="hero-cta-arrow"></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-scroll-indicator">
+    <div class="scroll-dot"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <span class="marquee-item">Architecture</span>
+    <span class="marquee-item">Interior Design</span>
+    <span class="marquee-item">Spatial Identity</span>
+    <span class="marquee-item">Material Culture</span>
+    <span class="marquee-item">Conceptual Craft</span>
+    <span class="marquee-item">Residential</span>
+    <span class="marquee-item">Commercial</span>
+    <span class="marquee-item">Hospitality</span>
+    <span class="marquee-item">Architecture</span>
+    <span class="marquee-item">Interior Design</span>
+    <span class="marquee-item">Spatial Identity</span>
+    <span class="marquee-item">Material Culture</span>
+    <span class="marquee-item">Conceptual Craft</span>
+    <span class="marquee-item">Residential</span>
+    <span class="marquee-item">Commercial</span>
+    <span class="marquee-item">Hospitality</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- ABOUT SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="about">
+  <div class="about-left">
+    <div class="parallax-img-wrap">
+      <div class="about-image-main">
+        <div class="parallax-img-inner about-image-main-inner"></div>
+      </div>
+    </div>
+    <div class="about-img-accent parallax-img-wrap">
+      <div class="parallax-img-inner"></div>
+    </div>
+    <div class="about-year-badge">
+      <span>15</span>
+      <span>Years</span>
+    </div>
+  </div>
+
+  <div class="about-right">
+    <div class="section-label reveal-up">About the Studio</div>
+    <h2 class="about-headline reveal-up">
+      We don't design buildings.<br>
+      We craft <em>experiences</em>.
+    </h2>
+    <p class="about-body reveal-up">
+      Founded in 2009 by Elise Moreau and Jean-Paul Fontaine, FORMA has become one of Europe's most celebrated architecture and interior design studios. Our multidisciplinary team of 24 architects, designers, and craftspeople work at the intersection of art, culture, and built space.
+    </p>
+    <p class="about-body reveal-up">
+      Every project begins with a single question: what emotion should this space evoke? From that kernel, we develop spatial narratives that are both rigorously functional and deeply poetic.
+    </p>
+
+    <div class="about-stats">
+      <div class="stat-item reveal-up">
+        <div class="stat-num">180<sup>+</sup></div>
+        <div class="stat-label">Projects completed</div>
+      </div>
+      <div class="stat-item reveal-up">
+        <div class="stat-num">32<sup>+</sup></div>
+        <div class="stat-label">Awards won</div>
+      </div>
+      <div class="stat-item reveal-up">
+        <div class="stat-num">18</div>
+        <div class="stat-label">Countries</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PROJECTS SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="projects">
+  <div class="projects-header">
+    <div>
+      <div class="section-label reveal-up">Selected Work</div>
+      <h2 class="projects-headline reveal-up">
+        Recent<br>
+        <em>Projects</em>
+      </h2>
+    </div>
+    <a href="#" class="projects-view-all reveal-up">All Projects</a>
+  </div>
+
+  <div class="projects-list">
+
+    <div class="project-item" data-preview="1">
+      <div class="project-num">01</div>
+      <div class="project-meta">
+        <div class="project-category">Residential</div>
+        <div class="project-location">Paris, France</div>
+      </div>
+      <div class="project-title">Maison Silencieuse</div>
+      <div class="project-year">2024</div>
+    </div>
+
+    <div class="project-item" data-preview="2">
+      <div class="project-num">02</div>
+      <div class="project-meta">
+        <div class="project-category">Hospitality</div>
+        <div class="project-location">Kyoto, Japan</div>
+      </div>
+      <div class="project-title">The Mineral Hotel</div>
+      <div class="project-year">2024</div>
+    </div>
+
+    <div class="project-item" data-preview="3">
+      <div class="project-num">03</div>
+      <div class="project-meta">
+        <div class="project-category">Commercial</div>
+        <div class="project-location">Dubai, UAE</div>
+      </div>
+      <div class="project-title">Onyx Tower</div>
+      <div class="project-year">2023</div>
+    </div>
+
+    <div class="project-item" data-preview="4">
+      <div class="project-num">04</div>
+      <div class="project-meta">
+        <div class="project-category">Interior Design</div>
+        <div class="project-location">Milan, Italy</div>
+      </div>
+      <div class="project-title">Casa Materia</div>
+      <div class="project-year">2023</div>
+    </div>
+
+    <div class="project-item" data-preview="5">
+      <div class="project-num">05</div>
+      <div class="project-meta">
+        <div class="project-category">Cultural</div>
+        <div class="project-location">Amsterdam, Netherlands</div>
+      </div>
+      <div class="project-title">The Archive Gallery</div>
+      <div class="project-year">2022</div>
+    </div>
+
+  </div>
+
+  <!-- Preview Image (follows cursor) -->
+  <div class="project-preview" id="project-preview">
+    <div class="project-preview-inner preview-bg-1">
+      <div class="project-preview-label">Hover to Preview</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SERVICES SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="services">
+  <div class="services-bg-text">Services</div>
+  <div class="services-header">
+    <div class="section-label reveal-up">What We Offer</div>
+    <h2 class="services-headline reveal-up">
+      Holistic design <em>across</em> every scale
+    </h2>
+  </div>
+
+  <div class="services-grid">
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">01</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="8" width="28" height="24" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="4" y1="8" x2="18" y2="2" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="18" y1="2" x2="32" y2="8" stroke="#0E0D0B" stroke-width="1"/>
+            <rect x="14" y="20" width="8" height="12" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="4" y1="16" x2="32" y2="16" stroke="#0E0D0B" stroke-width="0.5" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <div class="service-name">Architecture & Master Planning</div>
+        <p class="service-desc">From concept to completion, we architect buildings that define their context — structurally precise, aesthetically singular.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">02</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="6" width="32" height="24" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="2" y1="14" x2="34" y2="14" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="14" y1="6" x2="14" y2="30" stroke="#0E0D0B" stroke-width="0.5"/>
+            <rect x="6" y="18" width="4" height="8" fill="#0E0D0B" opacity="0.3"/>
+            <rect x="18" y="10" width="10" height="4" fill="#0E0D0B" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="service-name">Interior Design & Spatial Identity</div>
+        <p class="service-desc">Interiors as inhabited sculpture — every surface, material, and light source considered as part of a unified sensory experience.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">03</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="14" stroke="#0E0D0B" stroke-width="1"/>
+            <circle cx="18" cy="18" r="6" stroke="#0E0D0B" stroke-width="0.5" stroke-dasharray="2 2"/>
+            <line x1="18" y1="4" x2="18" y2="32" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="4" y1="18" x2="32" y2="18" stroke="#0E0D0B" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="service-name">Landscape & Environmental Design</div>
+        <p class="service-desc">The dialogue between architecture and landscape — outdoor spaces designed as extensions of the interior narrative.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">04</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 28 L18 8 L30 28" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="6" y1="28" x2="30" y2="28" stroke="#0E0D0B" stroke-width="1"/>
+            <line x1="18" y1="8" x2="18" y2="28" stroke="#0E0D0B" stroke-width="0.5" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <div class="service-name">Lighting & Atmosphere Design</div>
+        <p class="service-desc">Light is the invisible material of architecture. We design lighting experiences that transform space through time and mood.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">05</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="8" width="20" height="20" stroke="#0E0D0B" stroke-width="1"/>
+            <rect x="12" y="12" width="12" height="12" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="8" y1="8" x2="2" y2="2" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="28" y1="8" x2="34" y2="2" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="8" y1="28" x2="2" y2="34" stroke="#0E0D0B" stroke-width="0.5"/>
+            <line x1="28" y1="28" x2="34" y2="34" stroke="#0E0D0B" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="service-name">Furniture & Object Design</div>
+        <p class="service-desc">Bespoke furniture and objects conceived in concert with the space — pieces that are simultaneously art and function.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-card-content">
+        <div class="service-num">06</div>
+        <div class="service-icon">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 32 C4 20 16 20 16 10 C16 4 20 4 20 10 C20 20 32 20 32 32" stroke="#0E0D0B" stroke-width="1" fill="none"/>
+            <line x1="4" y1="32" x2="32" y2="32" stroke="#0E0D0B" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="service-name">Renovation & Heritage</div>
+        <p class="service-desc">Breathing new life into historic structures while honoring their material memory — contemporary function within historic soul.</p>
+        <a href="#" class="service-link">Explore</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PROCESS SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="process">
+  <div class="process-header">
+    <div class="section-label reveal-up">How We Work</div>
+    <h2 class="process-headline reveal-up">A methodology <em>rooted</em> in curiosity</h2>
+  </div>
+
+  <div class="process-steps">
+
+    <div class="process-step">
+      <div class="process-step-dot"><div class="process-step-dot-inner"></div></div>
+      <div>
+        <div class="process-step-num">Phase 01</div>
+        <div class="process-step-name reveal-up">Discovery & Immersion</div>
+        <p class="process-step-desc reveal-up">We begin by listening. Every project starts with deep research into client vision, site history, cultural context, and material possibilities. We inhabit the problem before proposing any solution.</p>
+        <div class="process-step-detail reveal-up">
+          <span class="process-tag">Client Workshops</span>
+          <span class="process-tag">Site Analysis</span>
+          <span class="process-tag">Precedent Research</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-step">
+      <div class="process-step-dot"><div class="process-step-dot-inner"></div></div>
+      <div>
+        <div class="process-step-num">Phase 02</div>
+        <div class="process-step-name reveal-up">Concept & Strategy</div>
+        <p class="process-step-desc reveal-up">A single, powerful concept drives every decision. This conceptual anchor — spatial, material, or narrative — becomes the DNA from which all design choices evolve with coherence.</p>
+        <div class="process-step-detail reveal-up">
+          <span class="process-tag">Mood Boards</span>
+          <span class="process-tag">Spatial Narrative</span>
+          <span class="process-tag">3D Sketching</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-step">
+      <div class="process-step-dot"><div class="process-step-dot-inner"></div></div>
+      <div>
+        <div class="process-step-num">Phase 03</div>
+        <div class="process-step-name reveal-up">Design Development</div>
+        <p class="process-step-desc reveal-up">Concept crystallizes into detailed drawings, material specifications, and technical documentation. We collaborate with structural engineers, craftspeople, and specialist consultants throughout.</p>
+        <div class="process-step-detail reveal-up">
+          <span class="process-tag">Technical Drawings</span>
+          <span class="process-tag">Material Palette</span>
+          <span class="process-tag">Visualization</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-step">
+      <div class="process-step-dot"><div class="process-step-dot-inner"></div></div>
+      <div>
+        <div class="process-step-num">Phase 04</div>
+        <div class="process-step-name reveal-up">Craft & Realization</div>
+        <p class="process-step-desc reveal-up">We remain intimately involved through construction and installation. Our on-site presence ensures that the built reality matches — and often surpasses — the designed intention.</p>
+        <div class="process-step-detail reveal-up">
+          <span class="process-tag">Site Supervision</span>
+          <span class="process-tag">Quality Control</span>
+          <span class="process-tag">Artisan Collaboration</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- AWARDS SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="awards">
+  <div class="section-label reveal-up">Recognition</div>
+  <h2 class="awards-headline reveal-up">
+    Awards &<br>
+    <em>Recognition</em>
+  </h2>
+
+  <div class="awards-grid">
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2024</div>
+      <div class="award-name">Dezeen Award — Interior of the Year</div>
+      <div class="award-project">Casa Materia, Milan</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2024</div>
+      <div class="award-name">Wallpaper* Design Award</div>
+      <div class="award-project">The Mineral Hotel, Kyoto</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2023</div>
+      <div class="award-name">RIBA European Award</div>
+      <div class="award-project">Onyx Tower, Dubai</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2023</div>
+      <div class="award-name">Architectural Digest AD100</div>
+      <div class="award-project">Studio Recognition</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2022</div>
+      <div class="award-name">World Architecture Festival</div>
+      <div class="award-project">The Archive Gallery</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2022</div>
+      <div class="award-name">Frame Award — Best Spatial Experience</div>
+      <div class="award-project">Maison Silencieuse</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2021</div>
+      <div class="award-name">Prix de Rome — Architecture</div>
+      <div class="award-project">Jean-Paul Fontaine</div>
+    </div>
+
+    <div class="award-item">
+      <div class="award-badge">★</div>
+      <div class="award-year">2020</div>
+      <div class="award-name">FX International Interior Design</div>
+      <div class="award-project">Apartment Luzern</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- QUOTE SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="quote">
+  <div>
+    <p class="quote-text reveal-up">
+      "Architecture begins where engineering ends — it is the <em>art of space</em>, the poetry of proportion, and the courage to make permanence from transient moments."
+    </p>
+    <p class="quote-author reveal-up">— Elise Moreau, Co-Founder & Principal Architect</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CONTACT SECTION -->
+<!-- ═══════════════════════════════════════════ -->
+<section id="contact">
+  <div class="contact-left">
+    <div class="section-label reveal-up">Get in Touch</div>
+    <h2 class="contact-headline reveal-up">
+      Let's build<br>
+      something <em>remarkable</em>
+    </h2>
+    <p class="contact-body reveal-up">We take on a limited number of projects each year to ensure every client receives our fullest attention and creative commitment.</p>
+
+    <ul class="contact-info-list">
+      <li class="contact-info-item">
+        <span class="contact-info-label">Email</span>
+        <span class="contact-info-value"><a href="mailto:studio@forma.com">studio@forma.com</a></span>
+      </li>
+      <li class="contact-info-item">
+        <span class="contact-info-label">Phone</span>
+        <span class="contact-info-value">+33 1 42 68 00 00</span>
+      </li>
+      <li class="contact-info-item">
+        <span class="contact-info-label">Studio</span>
+        <span class="contact-info-value">Paris — Tokyo — Dubai</span>
+      </li>
+      <li class="contact-info-item">
+        <span class="contact-info-label">New Business</span>
+        <span class="contact-info-value"><a href="mailto:new@forma.com">new@forma.com</a></span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="contact-right">
+    <form class="contact-form" onsubmit="return false;">
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" placeholder="Jean-Pierre Dumont" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="jp@example.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="project-type">Project Type</label>
+        <select id="project-type">
+          <option value="">Select type...</option>
+          <option>Residential Architecture</option>
+          <option>Commercial Architecture</option>
+          <option>Interior Design</option>
+          <option>Hospitality</option>
+          <option>Landscape Design</option>
+          <option>Renovation & Heritage</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">Tell Us About Your Project</label>
+        <textarea id="message" placeholder="Describe your vision, timeline, and location..."></textarea>
+      </div>
+      <button class="submit-btn magnetic" type="submit">
+        <span>Send Enquiry</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">FORMA</div>
+  <div class="footer-tagline">Architecture is the art of how to waste space.</div>
+  <div class="footer-right">
+    © 2025 Studio FORMA. All rights reserved.<br>
+    Paris · Tokyo · Dubai
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT — GSAP + ScrollTrigger + Interactions
+══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Register GSAP Plugins ──────────────────────────────
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ─── CUSTOM CURSOR ─────────────────────────────────────
+  const cursor = document.getElementById('cursor');
+  const cursorRing = document.getElementById('cursor-ring');
+  const cursorDot = document.getElementById('cursor-dot');
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let ringX = mouseX, ringY = mouseY;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    gsap.set(cursorDot, { x: mouseX, y: mouseY });
+  });
+
+  // Smooth ring follow
+  gsap.ticker.add(() => {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    gsap.set(cursorRing, { x: ringX, y: ringY });
+  });
+
+  // Cursor states
+  document.querySelectorAll('a, button, .project-item, .service-card').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  document.querySelectorAll('.project-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      document.body.classList.add('cursor-view');
+      document.getElementById('cursor-label').textContent = 'VIEW';
+    });
+    el.addEventListener('mouseleave', () => {
+      document.body.classList.remove('cursor-view');
+    });
+  });
+
+  // ─── SCROLL PROGRESS ───────────────────────────────────
+  const scrollBar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    scrollBar.style.width = pct + '%';
+  });
+
+  // ─── MAGNETIC BUTTONS ──────────────────────────────────
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) * 0.35;
+      const dy = (e.clientY - cy) * 0.35;
+      gsap.to(btn, { x: dx, y: dy, duration: 0.4, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+    });
+  });
+
+  // ─── MENU TOGGLE ───────────────────────────────────────
+  const menuBtn = document.getElementById('menu-toggle');
+  const fullMenu = document.getElementById('fullscreen-menu');
+
+  menuBtn.addEventListener('click', () => {
+    menuBtn.classList.toggle('open');
+    fullMenu.classList.toggle('open');
+  });
+
+  fullMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menuBtn.classList.remove('open');
+      fullMenu.classList.remove('open');
+    });
+  });
+
+  // ─── PROJECT HOVER PREVIEW ─────────────────────────────
+  const preview = document.getElementById('project-preview');
+  const previewInner = preview.querySelector('.project-preview-inner');
+  const bgClasses = ['preview-bg-1','preview-bg-2','preview-bg-3','preview-bg-4','preview-bg-5'];
+
+  let previewActive = false;
+  let previewMoveRaf;
+
+  document.querySelectorAll('.project-item').forEach((item, i) => {
+    item.addEventListener('mouseenter', () => {
+      previewInner.className = 'project-preview-inner ' + (bgClasses[i] || bgClasses[0]);
+      preview.classList.add('active');
+    });
+    item.addEventListener('mouseleave', () => {
+      preview.classList.remove('active');
+    });
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    gsap.to(preview, {
+      left: e.clientX + 24,
+      top: e.clientY - 80,
+      duration: 0.6,
+      ease: 'power3.out'
+    });
+  });
+
+  // ─── PRELOADER ─────────────────────────────────────────
+  const preloader = document.getElementById('preloader');
+  const counter = preloader.querySelector('.preloader-counter');
+  const bar = document.getElementById('preloader-bar');
+  const preloaderLogo = preloader.querySelector('.preloader-logo');
+  const preloaderTagline = preloader.querySelector('.preloader-tagline');
+
+  let count = 0;
+  const target = 100;
+  const duration = 2200;
+  const startTime = performance.now();
+
+  gsap.to(preloaderLogo, { opacity: 1, duration: 0.6, delay: 0.2 });
+  gsap.to(preloaderTagline, { opacity: 1, duration: 0.6, delay: 0.5 });
+
+  function animateCounter(ts) {
+    const elapsed = ts - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    count = Math.floor(eased * target);
+    counter.textContent = count;
+    bar.style.width = count + '%';
+    if (progress < 1) {
+      requestAnimationFrame(animateCounter);
+    } else {
+      counter.textContent = 100;
+      bar.style.width = '100%';
+      setTimeout(endPreloader, 300);
+    }
+  }
+
+  requestAnimationFrame(animateCounter);
+
+  function endPreloader() {
+    const tl = gsap.timeline();
+    tl.to(preloader, {
+      clipPath: 'inset(0 0 100% 0)',
+      duration: 1.0,
+      ease: 'power4.inOut'
+    });
+    tl.set(preloader, { display: 'none' });
+    tl.to('nav', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.3');
+
+    // Hero entrance
+    tl.from('.hero-eyebrow', {
+      y: 30, opacity: 0, duration: 0.8, ease: 'power3.out'
+    }, '-=0.2');
+
+    // Animate hero headline words
+    const heroWords = document.querySelectorAll('.hero-headline .split-text');
+    tl.from(heroWords, {
+      y: '100%',
+      opacity: 0,
+      duration: 1.0,
+      stagger: 0.15,
+      ease: 'power4.out'
+    }, '-=0.5');
+
+    tl.from('.hero-tagline, .hero-cta', {
+      y: 30, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out'
+    }, '-=0.4');
+
+    tl.from('.hero-scroll-indicator', {
+      opacity: 0, y: 20, duration: 0.8, ease: 'power3.out'
+    }, '-=0.3');
+  }
+
+  // ─── SCROLL TRIGGER ANIMATIONS ─────────────────────────
+  // reveal-up elements — registered bidirectionally below in showoff system
+
+  // About section parallax images
+  gsap.utils.toArray('.parallax-img-inner').forEach(img => {
+    gsap.to(img, {
+      y: '-8%',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: img.closest('.parallax-img-wrap') || img.parentElement,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+  });
+
+  // Stat counter animation
+  document.querySelectorAll('.stat-num').forEach(stat => {
+    const text = stat.textContent;
+    const num = parseInt(text.replace(/\D/g, ''));
+    const sup = stat.querySelector('sup');
+    const supText = sup ? sup.textContent : '';
+
+    scrollTriggerCounter(stat, num, supText);
+  });
+
+  function scrollTriggerCounter(el, target, suffix) {
+    let obj = { val: 0 };
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      onEnter: () => {
+        gsap.to(obj, {
+          val: target,
+          duration: 1.8,
+          ease: 'power2.out',
+          onUpdate: () => {
+            el.innerHTML = Math.round(obj.val) + (suffix ? `<sup>${suffix}</sup>` : '');
+          }
+        });
+      }
+    });
+  }
+
+  // Process steps stagger
+  gsap.utils.toArray('.process-step').forEach((step, i) => {
+    gsap.from(step, {
+      opacity: 0,
+      x: -40,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: step,
+        start: 'top 85%',
+        toggleActions: 'play none none none'
+      },
+      delay: i * 0.08
+    });
+  });
+
+  // Awards stagger
+  gsap.from('.award-item', {
+    opacity: 0,
+    y: 30,
+    duration: 0.7,
+    stagger: 0.07,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '.awards-grid',
+      start: 'top 80%',
+      toggleActions: 'play reverse play reverse'
+    }
+  });
+
+  // Services stagger
+  gsap.from('.service-card', {
+    opacity: 0,
+    y: 50,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '.services-grid',
+      start: 'top 80%',
+      toggleActions: 'play reverse play reverse'
+    }
+  });
+
+  // Project items stagger
+  gsap.from('.project-item', {
+    opacity: 0,
+    x: -30,
+    duration: 0.8,
+    stagger: 0.12,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '.projects-list',
+      start: 'top 80%',
+      toggleActions: 'play reverse play reverse'
+    }
+  });
+
+  // Navbar morph on scroll
+  const mainNav = document.getElementById('main-nav');
+  ScrollTrigger.create({
+    start: 'top -80px',
+    onToggle: (self) => {
+      if (self.isActive) {
+        gsap.to(mainNav, {
+          background: 'rgba(14,13,11,0.85)',
+          backdropFilter: 'blur(20px)',
+          padding: '1.2rem 4rem',
+          mixBlendMode: 'normal',
+          duration: 0.4
+        });
+      } else {
+        gsap.to(mainNav, {
+          background: 'transparent',
+          backdropFilter: 'blur(0px)',
+          padding: '2.5rem 4rem',
+          mixBlendMode: 'difference',
+          duration: 0.4
+        });
+      }
+    }
+  });
+
+  // Clip-path reveals for section transitions — bidirectional
+  gsap.utils.toArray('.clip-reveal').forEach(el => {
+    gsap.fromTo(el,
+      { clipPath: 'inset(0 100% 0 0)' },
+      {
+        clipPath: 'inset(0 0% 0 0)',
+        duration: 1.2,
+        ease: 'power4.inOut',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          toggleActions: 'play reverse play reverse'
+        }
+      }
+    );
+  });
+
+  // All reveal-up — bidirectional (re-register with reverse)
+  gsap.utils.toArray('.reveal-up').forEach(el => {
+    gsap.fromTo(el,
+      { y: 60, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 1.0,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          toggleActions: 'play reverse play reverse'
+        }
+      }
+    );
+  });
+
+  // Marquee speed on hover
+  const marqueeTrack = document.querySelector('.marquee-track');
+  document.querySelector('.marquee-strip').addEventListener('mouseenter', () => {
+    marqueeTrack.style.animationDuration = '8s';
+  });
+  document.querySelector('.marquee-strip').addEventListener('mouseleave', () => {
+    marqueeTrack.style.animationDuration = '20s';
+  });
+
+  // ─── SMOOTH ANCHOR SCROLL ──────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // ─── SCROLL-BACK SHOWOFF SYSTEM ────────────────────────
+  //  When user scrolls back UP past a section boundary,
+  //  a bespoke cinematic re-entrance fires for that section
+  // ═══════════════════════════════════════════════════════
+
+  // Gold sweep flash — fires on every upward section cross
+  const flashEl = document.createElement('div');
+  flashEl.style.cssText = `
+    position:fixed; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,#C9A96E 40%,#C9A96E 60%,transparent);
+    z-index:8888; pointer-events:none; opacity:0; transform:scaleX(0);
+    transform-origin:left center;
+  `;
+  document.body.appendChild(flashEl);
+
+  function flashLine() {
+    gsap.killTweensOf(flashEl);
+    gsap.timeline()
+      .set(flashEl, { scaleX: 0, opacity: 1 })
+      .to(flashEl, { scaleX: 1, duration: 0.45, ease: 'power3.out' })
+      .to(flashEl, { opacity: 0, duration: 0.4, ease: 'power2.in' });
+  }
+
+  // Scroll direction indicator pill
+  const dirPill = document.createElement('div');
+  dirPill.innerHTML = '<span id="dir-arrow">↓</span>';
+  dirPill.style.cssText = `
+    position:fixed; bottom:2rem; right:2rem;
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid rgba(201,169,110,0.35);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#C9A96E; z-index:8000;
+    pointer-events:none; opacity:0; transition:opacity 0.4s;
+    background:rgba(14,13,11,0.7); backdrop-filter:blur(10px);
+  `;
+  document.body.appendChild(dirPill);
+
+  let lastSY = window.scrollY;
+  let currDir = 'down';
+  let pillTimeout;
+
+  window.addEventListener('scroll', () => {
+    const sy = window.scrollY;
+    const nd = sy < lastSY ? 'up' : 'down';
+    dirPill.style.opacity = '1';
+    clearTimeout(pillTimeout);
+    pillTimeout = setTimeout(() => dirPill.style.opacity = '0', 1400);
+    if (nd !== currDir) {
+      currDir = nd;
+      const arrow = document.getElementById('dir-arrow');
+      gsap.fromTo(dirPill,
+        { scale: 1, borderColor: 'rgba(201,169,110,0.35)' },
+        { scale: 1.35, borderColor: 'rgba(201,169,110,0.9)', duration: 0.18, yoyo: true, repeat: 1,
+          onComplete: () => { arrow.textContent = nd === 'up' ? '↑' : '↓'; }
+        }
+      );
+      if (nd === 'up') gsap.to(dirPill, { background: 'rgba(201,169,110,0.12)', duration: 0.25, yoyo: true, repeat: 1 });
+    }
+    lastSY = sy;
+  }, { passive: true });
+
+  // ─── PER-SECTION SHOWOFF TIMELINES ─────────────────────
+  function buildShowoff(sectionId) {
+    const sec = document.querySelector(sectionId);
+    if (!sec) return;
+
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 92%',
+      onLeaveBack: () => {
+        flashLine();
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+        if (sectionId === '#about') {
+          const img   = sec.querySelector('.about-image-main');
+          const badge = sec.querySelector('.about-year-badge');
+          const txts  = sec.querySelectorAll('.about-headline, .about-body, .stat-item');
+          tl.fromTo(img,   { x: -100, opacity: 0, rotation: -3 }, { x: 0, opacity: 1, rotation: 0, duration: 0.85 })
+            .fromTo(badge, { scale: 0, opacity: 0, rotation: -25 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: 'back.out(2.5)' }, '-=0.5')
+            .fromTo(txts,  { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, stagger: 0.08 }, '-=0.55');
+        }
+
+        else if (sectionId === '#projects') {
+          const hdr   = sec.querySelector('.projects-header');
+          const items = sec.querySelectorAll('.project-item');
+          tl.fromTo(hdr,   { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 })
+            .fromTo(items, { y: 70, opacity: 0, skewX: 4 }, { y: 0, opacity: 1, skewX: 0, duration: 0.65, stagger: 0.09 }, '-=0.35');
+        }
+
+        else if (sectionId === '#services') {
+          const cards = [...sec.querySelectorAll('.service-card')];
+          const mid = Math.floor(cards.length / 2);
+          cards.forEach((c, i) => {
+            const off = i - mid;
+            tl.fromTo(c,
+              { y: 90 + Math.abs(off) * 18, opacity: 0, scale: 0.88 },
+              { y: 0, opacity: 1, scale: 1, duration: 0.75 },
+              Math.abs(off) * 0.06
+            );
+          });
+        }
+
+        else if (sectionId === '#process') {
+          const steps = sec.querySelectorAll('.process-step');
+          tl.fromTo(steps,
+            { x: -90, opacity: 0, clipPath: 'inset(0 100% 0 0)' },
+            { x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 0.8, stagger: 0.11 }
+          );
+        }
+
+        else if (sectionId === '#awards') {
+          const items = sec.querySelectorAll('.award-item');
+          items.forEach((item, i) => {
+            tl.fromTo(item,
+              { x: (Math.random()-.5)*70, y: (Math.random()-.5)*50+50, opacity: 0, rotation: (Math.random()-.5)*10, scale: 0.82 },
+              { x: 0, y: 0, opacity: 1, rotation: 0, scale: 1, duration: 0.78 },
+              i * 0.055
+            );
+          });
+        }
+
+        else if (sectionId === '#quote') {
+          const q  = sec.querySelector('.quote-text');
+          const au = sec.querySelector('.quote-author');
+          tl.fromTo(q,  { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+                        { clipPath: 'inset(0 0% 0 0)', opacity: 1, duration: 1.1, ease: 'power4.inOut' })
+            .fromTo(au, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, '-=0.3');
+        }
+
+        else if (sectionId === '#contact') {
+          const L = sec.querySelector('.contact-left');
+          const R = sec.querySelector('.contact-right');
+          tl.fromTo(L, { y: -70, opacity: 0, rotation: -1 }, { y: 0, opacity: 1, rotation: 0, duration: 0.9 })
+            .fromTo(R, { y:  70, opacity: 0, rotation:  1 }, { y: 0, opacity: 1, rotation: 0, duration: 0.9 }, '-=0.75');
+        }
+      }
+    });
+  }
+
+  ['#about','#projects','#services','#process','#awards','#quote','#contact']
+    .forEach(buildShowoff);
+
+  // ─── PAGE IS READY ─────────────────────────────────────
+  console.log('%cFORMA Studio — Where Space Becomes Art', 'color:#C9A96E; font-family: serif; font-size:14px; font-style:italic;');
+
+})();
+</script>
+
+</body>
+</html>
