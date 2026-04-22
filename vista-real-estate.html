@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VISTA Real Estate | Buy, Sell & Rent Premium Properties</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===================== RESET & VARIABLES ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070a0f;
+      --bg-alt:    #0d1219;
+      --bg-card:   #111720;
+      --text:      #f0ece4;
+      --text-dim:  #7a7268;
+      --gold:      #c9a96e;
+      --gold-lt:   #e4cfa0;
+      --border:    rgba(201,169,110,0.18);
+      --serif:     'Cormorant Garamond', Georgia, serif;
+      --sans:      'DM Sans', sans-serif;
+    }
+
+    html { overflow-x: hidden; font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+    button { border: none; background: none; font-family: var(--sans); cursor: pointer; }
+
+    /* ===================== NAV ===================== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.8rem 4rem;
+      transition: background 0.5s, backdrop-filter 0.5s, padding 0.4s;
+    }
+    .nav.nav--scrolled {
+      background: rgba(7,10,15,0.9);
+      backdrop-filter: blur(16px);
+      padding: 1.2rem 4rem;
+    }
+
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--gold); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.8rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(240,236,228,0.55);
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      padding: 0.65rem 1.8rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.35s;
+    }
+    .nav-cta:hover { background: var(--gold); color: var(--bg); }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 700px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Layer 1 – background image */
+    .hero-bg {
+      position: absolute;
+      inset: -10% -5%;
+      background: url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1920&q=75') center / cover no-repeat;
+      filter: brightness(0.28) saturate(0.7);
+      will-change: transform;
+    }
+
+    /* Layer 2 – building/house image */
+    .hero-house-wrap {
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 1300px;
+      z-index: 3;
+      will-change: transform;
+      pointer-events: none;
+    }
+    .hero-house-wrap img {
+      width: 100%;
+      height: 65vh;
+      object-fit: cover;
+      object-position: bottom center;
+      -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
+      mask-image: linear-gradient(to top, black 30%, transparent 100%);
+    }
+
+    /* Layer 3 – cloud left */
+    .hero-cloud-l {
+      position: absolute;
+      left: -15%;
+      top: 8%;
+      width: 55%;
+      height: 50%;
+      will-change: transform;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, transparent 70%);
+      filter: blur(60px);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Layer 4 – cloud right */
+    .hero-cloud-r {
+      position: absolute;
+      right: -15%;
+      top: 0;
+      width: 55%;
+      height: 55%;
+      will-change: transform;
+      background: radial-gradient(ellipse at center, rgba(201,169,110,0.035) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Layer 5 – smoke bottom left */
+    .hero-smoke-l {
+      position: absolute;
+      bottom: 20%;
+      left: -5%;
+      width: 45%;
+      height: 30%;
+      will-change: transform;
+      background: radial-gradient(ellipse at bottom left, rgba(201,169,110,0.06) 0%, transparent 65%);
+      filter: blur(50px);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Layer 6 – smoke bottom right */
+    .hero-smoke-r {
+      position: absolute;
+      bottom: 10%;
+      right: -5%;
+      width: 45%;
+      height: 35%;
+      will-change: transform;
+      background: radial-gradient(ellipse at bottom right, rgba(255,255,255,0.03) 0%, transparent 65%);
+      filter: blur(60px);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Dark gradient from bottom */
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 35%, rgba(7,10,15,0.5) 70%, var(--bg) 100%);
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 0 2rem;
+      max-width: 950px;
+    }
+
+    .hero-headline {
+      font-family: var(--serif);
+      font-size: clamp(3.5rem, 8.5vw, 7.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1.6rem;
+    }
+    .hero-headline .line { display: block; overflow: hidden; }
+    .hero-headline .word-inner {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(110%);
+    }
+    .hero-headline em { font-style: italic; color: var(--gold-lt); }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      margin-bottom: 3rem;
+      opacity: 0;
+    }
+
+    .hero-btn {
+      display: inline-block;
+      padding: 1.1rem 3.5rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: all 0.4s;
+    }
+    .hero-btn:hover { background: var(--gold); color: var(--bg); }
+
+    /* scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+    }
+    .scroll-indicator span { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    .scroll-line {
+      width: 1px;
+      height: 50px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gold);
+      animation: scrollDown 1.6s ease-in-out infinite;
+    }
+    @keyframes scrollDown {
+      0% { top: -100%; }
+      100% { top: 100%; }
+    }
+
+    /* ===================== WHY VISTA ===================== */
+    .why-section {
+      padding: 12rem 4rem;
+    }
+    .why-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8rem;
+      align-items: center;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+
+    .reveal-heading {
+      font-family: var(--serif);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .reveal-heading .line { display: block; overflow: hidden; }
+    .reveal-heading .word-inner { display: inline-block; opacity: 0; transform: translateY(110%); }
+
+    .why-heading { font-size: clamp(2.5rem, 5vw, 4.5rem); margin-bottom: 2rem; }
+
+    .why-text {
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--text-dim);
+      margin-bottom: 2.5rem;
+    }
+
+    .text-link {
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      transition: gap 0.3s;
+    }
+    .text-link::after { content: '→'; font-size: 1rem; transition: transform 0.3s; }
+    .text-link:hover { gap: 1.2rem; }
+
+    .why-media {
+      position: relative;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      background: var(--bg-alt);
+    }
+    .why-media img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.75;
+      transition: transform 0.8s ease;
+    }
+    .why-media:hover img { transform: scale(1.04); }
+
+    .play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 88px; height: 88px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.35s, transform 0.35s;
+      z-index: 2;
+    }
+    .play-btn::after {
+      content: '';
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 11px 0 11px 19px;
+      border-color: transparent transparent transparent var(--gold);
+      margin-left: 5px;
+    }
+    .play-btn:hover { background: rgba(201,169,110,0.2); transform: translate(-50%,-50%) scale(1.06); }
+
+    /* ===================== NOT JUST RE ===================== */
+    .notjust-section {
+      background: var(--bg-alt);
+      padding: 10rem 4rem;
+    }
+
+    .notjust-head {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Pinned image grid */
+    .img-seq-pin { position: relative; }
+
+    .img-seq-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 0.75rem;
+      height: 68vh;
+    }
+    .seq-img {
+      overflow: hidden;
+      position: relative;
+      will-change: opacity, transform;
+    }
+    .seq-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scale(1.08);
+      transition: transform 1.2s ease;
+    }
+
+    .notjust-body {
+      text-align: center;
+      padding: 4rem 0 2rem;
+      font-family: var(--serif);
+      font-size: clamp(1.15rem, 2vw, 1.45rem);
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ===================== REWIRED / STEPS ===================== */
+    .steps-section {
+      padding: 12rem 4rem;
+    }
+    .steps-inner { max-width: 1400px; margin: 0 auto; }
+
+    .steps-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 6rem;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .steps-heading {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300;
+      line-height: 1.1;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .step-item {
+      padding: 3.5rem 3rem 3.5rem 0;
+      border-right: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    .step-item:last-child { border-right: none; padding-right: 0; }
+    .step-num {
+      font-family: var(--serif);
+      font-size: 4.5rem;
+      font-weight: 300;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+    .step-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-bottom: 1rem;
+    }
+    .step-text {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--text-dim);
+    }
+
+    /* ===================== AGENTS ===================== */
+    .agents-section {
+      background: var(--bg-alt);
+      padding: 10rem 4rem;
+    }
+    .agents-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7rem;
+      align-items: center;
+    }
+
+    .agents-imgs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 0.75rem;
+      height: 60vh;
+      overflow: hidden;
+    }
+    .agent-img {
+      overflow: hidden;
+      position: relative;
+    }
+    .agent-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.9s ease;
+    }
+    .agent-img:hover img { transform: scale(1.06); }
+    .agent-img:first-child { grid-row: span 1; margin-top: 3rem; }
+
+    .agents-content {}
+    .agents-heading { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 0.5rem; }
+    .agents-heading em { font-style: italic; color: var(--gold-lt); }
+    .agents-body { font-size: 0.95rem; line-height: 1.85; color: var(--text-dim); margin-bottom: 3rem; }
+
+    .agents-btn {
+      display: inline-block;
+      padding: 1.1rem 3rem;
+      background: var(--gold);
+      color: var(--bg);
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .agents-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+    /* ===================== TESTIMONIALS ===================== */
+    .testimonials-section {
+      padding: 10rem 0;
+      overflow: hidden;
+    }
+    .testimonials-header {
+      padding: 0 4rem;
+      margin-bottom: 4.5rem;
+    }
+    .testimonials-header h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+    }
+    .testimonials-hero-img {
+      width: 100%;
+      height: 45vh;
+      object-fit: cover;
+      opacity: 0.35;
+      position: absolute;
+      top: 0; left: 0;
+    }
+
+    .testi-track-wrap { overflow: hidden; position: relative; }
+    .testi-track {
+      display: flex;
+      gap: 2rem;
+      padding: 0 4rem 0 4rem;
+      will-change: transform;
+    }
+
+    .testi-card {
+      flex: 0 0 420px;
+      padding: 3rem;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      transition: border-color 0.3s;
+    }
+    .testi-card:hover { border-color: rgba(201,169,110,0.4); }
+    .testi-stars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .testi-stars span { color: var(--gold); font-size: 0.9rem; }
+    .testi-quote {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.75;
+      color: rgba(240,236,228,0.85);
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+    .testi-author {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .testi-divider {
+      width: 30px;
+      height: 1px;
+      background: var(--border);
+      margin: 0.6rem 0;
+    }
+    .testi-role { font-size: 0.82rem; color: var(--text-dim); }
+
+    /* ===================== SERVICES ===================== */
+    .services-section { padding: 12rem 4rem; background: var(--bg); }
+    .services-inner { max-width: 1400px; margin: 0 auto; }
+    .services-header { margin-bottom: 5rem; }
+    .services-header h2 { font-family: var(--serif); font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 300; }
+    .services-subtext { font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; max-width: 500px; margin-top: 1rem; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1.5rem;
+    }
+
+    .service-card {
+      position: relative;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .service-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.9s ease;
+      filter: brightness(0.65);
+    }
+    .service-card:hover img { transform: scale(1.07); }
+    .service-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+      transition: background 0.5s;
+    }
+    .service-card:hover .service-card-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    }
+    .service-card-content {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 2.5rem;
+    }
+    .service-card-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+    .service-card-text {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: rgba(240,236,228,0.65);
+      margin-bottom: 1.5rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.6s ease, opacity 0.6s;
+      opacity: 0;
+    }
+    .service-card:hover .service-card-text { max-height: 150px; opacity: 1; }
+    .service-card-link {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* services cta bar */
+    .services-cta-bar {
+      margin-top: 4rem;
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .services-cta-text { font-family: var(--serif); font-size: 1.2rem; font-weight: 300; color: var(--text-dim); }
+    .services-cta-btn {
+      padding: 0.9rem 2.5rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: all 0.35s;
+    }
+    .services-cta-btn:hover { background: var(--gold); color: var(--bg); }
+
+    /* ===================== SUPPORT ===================== */
+    .support-section { background: var(--bg-alt); padding: 12rem 4rem; }
+    .support-inner { max-width: 1400px; margin: 0 auto; }
+    .support-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 5rem;
+      gap: 2rem;
+    }
+    .support-heading { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; }
+    .support-sublink { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); white-space: nowrap; transition: gap 0.3s; display: flex; align-items: center; gap: 0.6rem; }
+    .support-sublink::after { content: '→'; }
+
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1.5rem;
+    }
+    .support-card { overflow: hidden; }
+    .support-card-img {
+      aspect-ratio: 16/10;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .support-card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s ease;
+      filter: brightness(0.75);
+    }
+    .support-card:hover .support-card-img img { transform: scale(1.05); }
+    .support-card-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; margin-bottom: 0.75rem; }
+    .support-card-text { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 1.2rem; }
+    .support-card-link { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
+
+    /* ===================== BLOG ===================== */
+    .blog-section { padding: 12rem 4rem; }
+    .blog-inner { max-width: 1400px; margin: 0 auto; }
+    .blog-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4.5rem;
+      gap: 2rem;
+    }
+    .blog-heading { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; }
+    .blog-link { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 0.6rem; white-space: nowrap; }
+    .blog-link::after { content: '→'; }
+
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 2.5rem;
+    }
+    .blog-card { cursor: pointer; }
+    .blog-card-img {
+      aspect-ratio: 16/10;
+      overflow: hidden;
+      margin-bottom: 1.8rem;
+    }
+    .blog-card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s ease;
+      filter: brightness(0.8);
+    }
+    .blog-card:hover .blog-card-img img { transform: scale(1.06); }
+    .blog-date { font-size: 0.76rem; color: var(--text-dim); letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+    .blog-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; line-height: 1.35; margin-bottom: 0.8rem; transition: color 0.3s; }
+    .blog-card:hover .blog-title { color: var(--gold-lt); }
+    .blog-excerpt { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 1.2rem; }
+    .blog-read { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
+
+    /* ===================== CTA SECTION ===================== */
+    .cta-section {
+      position: relative;
+      padding: 14rem 4rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .cta-bg {
+      position: absolute;
+      inset: -10%;
+      background: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=75') center / cover no-repeat;
+      filter: brightness(0.15) saturate(0.5);
+      will-change: transform;
+    }
+    .cta-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,169,110,0.05) 0%, transparent 70%);
+    }
+    .cta-content { position: relative; z-index: 1; }
+    .cta-heading {
+      font-family: var(--serif);
+      font-size: clamp(3rem, 7.5vw, 7rem);
+      font-weight: 300;
+      line-height: 1.05;
+      margin-bottom: 3.5rem;
+    }
+    .cta-heading em { font-style: italic; color: var(--gold-lt); }
+    .cta-heading .line { display: block; overflow: hidden; }
+    .cta-heading .word-inner { display: inline-block; opacity: 0; transform: translateY(110%); }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 1.2rem 4rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: all 0.4s;
+    }
+    .cta-btn:hover { background: var(--gold); color: var(--bg); }
+
+    /* ===================== FOOTER ===================== */
+    .footer {
+      padding: 7rem 4rem 3rem;
+      background: var(--bg-alt);
+      border-top: 1px solid var(--border);
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1fr 1.3fr;
+      gap: 4rem;
+      margin-bottom: 5rem;
+    }
+    .footer-logo {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .footer-logo span { color: var(--gold); }
+    .footer-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 2rem; }
+    .footer-newsletter {
+      display: flex;
+    }
+    .footer-newsletter input {
+      flex: 1;
+      padding: 0.85rem 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-right: none;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .footer-newsletter input::placeholder { color: var(--text-dim); }
+    .footer-newsletter button {
+      padding: 0.85rem 1.3rem;
+      background: var(--gold);
+      color: var(--bg);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .footer-newsletter button:hover { opacity: 0.85; }
+
+    .footer-col-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.8rem;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+    .footer-links a { font-size: 0.88rem; color: var(--text-dim); transition: color 0.3s, padding-left 0.3s; display: block; }
+    .footer-links a:hover { color: var(--text); padding-left: 4px; }
+
+    .footer-contact p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 0.5rem; }
+    .footer-contact a { color: var(--text-dim); transition: color 0.3s; }
+    .footer-contact a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-copy { font-size: 0.78rem; color: var(--text-dim); }
+    .footer-socials { display: flex; gap: 1.5rem; }
+    .footer-socials a { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); transition: color 0.3s; }
+    .footer-socials a:hover { color: var(--gold); }
+    .footer-legal { display: flex; gap: 2rem; }
+    .footer-legal a { font-size: 0.76rem; color: var(--text-dim); transition: color 0.3s; }
+    .footer-legal a:hover { color: var(--text); }
+
+    /* ===================== UTILS ===================== */
+    .overflow-h { overflow: hidden; }
+    .text-gold { color: var(--gold); }
+    .mt-auto { margin-top: auto; }
+
+    /* custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--gold);
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s;
+    }
+    .cursor-follower {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,169,110,0.4);
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav" id="mainNav">
+    <a href="#" class="nav-logo">VISTA<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#">Search</a></li>
+      <li><a href="#">Agents</a></li>
+      <li><a href="#">Join</a></li>
+      <li><a href="#">Services</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <a href="#" class="nav-cta">Sign In</a>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="hero">
+    <!-- Parallax Layer 1 – BG -->
+    <div class="hero-bg" id="heroBg"></div>
+
+    <!-- Parallax Layer 2 – Building -->
+    <div class="hero-house-wrap" id="heroHouse">
+      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80" alt="Luxury Villa" />
+    </div>
+
+    <!-- Parallax Layer 3 – Cloud left -->
+    <div class="hero-cloud-l" id="cloudL"></div>
+
+    <!-- Parallax Layer 4 – Cloud right -->
+    <div class="hero-cloud-r" id="cloudR"></div>
+
+    <!-- Parallax Layer 5 – Smoke left -->
+    <div class="hero-smoke-l" id="smokeL"></div>
+
+    <!-- Parallax Layer 6 – Smoke right -->
+    <div class="hero-smoke-r" id="smokeR"></div>
+
+    <!-- Gradient overlay -->
+    <div class="hero-gradient"></div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <h1 class="hero-headline" id="heroHeadline">
+        <span class="line"><span class="word-inner">Discover Where</span></span>
+        <span class="line"><em><span class="word-inner">You Belong</span></em></span>
+      </h1>
+      <p class="hero-sub" id="heroSub">Expert agents. Real guidance. A clear path to find what's next.</p>
+      <a href="#" class="hero-btn" id="heroBtn">Explore Properties</a>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ===================== WHY VISTA ===================== -->
+  <section class="why-section">
+    <div class="why-inner">
+      <div class="why-left">
+        <span class="section-label">Why VISTA</span>
+        <h2 class="reveal-heading why-heading" data-split>
+          <span class="line"><span class="word-inner">Your life is</span></span>
+          <span class="line"><span class="word-inner">changing. Find</span></span>
+          <span class="line"><em><span class="word-inner">what's next.</span></em></span>
+        </h2>
+        <p class="why-text">
+          Don't just find a place — find what's next. We help you move forward with clarity, confidence, and the right agent by your side. From Jeddah's iconic Corniche to Riyadh's thriving districts, we know every corner of Saudi Arabia's real estate landscape.
+        </p>
+        <a href="#" class="text-link">Learn Our Story</a>
+      </div>
+      <div class="why-right why-media">
+        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80" alt="Why VISTA" />
+        <div class="play-btn"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NOT JUST RE ===================== -->
+  <section class="notjust-section">
+    <h2 class="notjust-head reveal-heading" data-split>
+      <span class="line"><span class="word-inner">This isn't just about real estate.</span></span>
+    </h2>
+    <div class="img-seq-pin" id="imgSeqPin">
+      <div class="img-seq-grid">
+        <div class="seq-img" id="seqImg1">
+          <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80" alt="Property 1" />
+        </div>
+        <div class="seq-img" id="seqImg2">
+          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80" alt="Property 2" />
+        </div>
+        <div class="seq-img" id="seqImg3">
+          <img src="https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=800&q=80" alt="Property 3" />
+        </div>
+        <div class="seq-img" id="seqImg4">
+          <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" alt="Property 4" />
+        </div>
+      </div>
+    </div>
+    <p class="notjust-body">
+      It's about identity. Progress. Getting unstuck. You're not just looking for a place. You're looking for alignment — with your life, your goals, and your future. That's what we help you find.
+    </p>
+  </section>
+
+  <!-- ===================== STEPS / REWIRED ===================== -->
+  <section class="steps-section">
+    <div class="steps-inner">
+      <div class="steps-top">
+        <div>
+          <span class="section-label">Real Estate, Rewired.</span>
+          <h2 class="steps-heading reveal-heading" data-split>
+            <span class="line"><span class="word-inner">How VISTA</span></span>
+            <span class="line"><em><span class="word-inner">Works</span></em></span>
+          </h2>
+        </div>
+        <a href="#" class="text-link" style="margin-bottom: 0.5rem;">Start Your Search</a>
+      </div>
+      <div class="steps-grid">
+        <div class="step-item">
+          <div class="step-num">01</div>
+          <div class="step-title">Talk to a Real Human.</div>
+          <p class="step-text">We match you with an expert agent who actually listens — no bots, no algorithms. Just a trusted local advisor who knows your market.</p>
+        </div>
+        <div class="step-item" style="padding-left: 3rem;">
+          <div class="step-num">02</div>
+          <div class="step-title">Get Clarity.</div>
+          <p class="step-text">We define what you really need, not just what's available. Our process cuts through the noise to find the property that truly fits your life.</p>
+        </div>
+        <div class="step-item" style="padding-left: 3rem;">
+          <div class="step-num">03</div>
+          <div class="step-title">Move Forward.</div>
+          <p class="step-text">We find what fits — and make it happen. From negotiation to keys in hand, VISTA handles every step with precision and care.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AGENTS ===================== -->
+  <section class="agents-section">
+    <div class="agents-inner">
+      <!-- Images – animate from left -->
+      <div class="agents-imgs" id="agentsImgs">
+        <div class="agent-img">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" alt="Agent" />
+        </div>
+        <div class="agent-img">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80" alt="Agent" />
+        </div>
+      </div>
+
+      <!-- Content – animate from right -->
+      <div class="agents-content" id="agentsContent">
+        <span class="section-label">For Agents</span>
+        <h2 class="reveal-heading agents-heading" data-split>
+          <span class="line"><span class="word-inner">Don't Rent</span></span>
+          <span class="line"><em><span class="word-inner">Your Career.</span></em></span>
+          <span class="line"><span class="word-inner">Own It.</span></span>
+        </h2>
+        <p class="agents-body" style="margin-top: 1.5rem;">
+          At VISTA, our agents don't just work for the brand — they own a part of it. We give top performers real equity and real support, so they're invested in more than just your transaction. You're not just here to close deals — you're building a career, a life, a legacy. We help agents find the brokerage that gives them the tools and leadership to truly thrive.
+        </p>
+        <a href="#" class="agents-btn">Join The Movement</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TESTIMONIALS ===================== -->
+  <section class="testimonials-section" id="testiSection">
+    <div class="testimonials-header">
+      <span class="section-label">Client Stories</span>
+      <h2>Don't Take Our Word for It.</h2>
+    </div>
+    <div class="testi-track-wrap">
+      <div class="testi-track" id="testiTrack">
+
+        <div class="testi-card">
+          <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <p class="testi-quote">"Khalid was an exceptional agent. Dedicated, knowledgeable, and always available. He helped us find our dream villa in Al-Hamra within weeks. His understanding of Jeddah's market is unmatched."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-author">Nora Al-Rashid</div>
+          <div class="testi-role">Purchased in Al-Hamra, Jeddah</div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <p class="testi-quote">"VISTA helped us sell our property in record time at above asking price. Their staging advice and strategic pricing were spot-on. Professional, responsive, and genuinely invested in our success."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-author">Faris Al-Dossari</div>
+          <div class="testi-role">Sold in Al-Shati District</div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <p class="testi-quote">"As a first-time buyer, I was overwhelmed. My VISTA agent walked me through every step with patience and expertise. I couldn't imagine navigating Riyadh's market without them."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-author">Lama Al-Otaibi</div>
+          <div class="testi-role">First Home in Riyadh</div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <p class="testi-quote">"I needed to find a high-quality rental quickly for a corporate relocation. VISTA had access to listings not on any public platform. Found an incredible apartment in King Abdullah Economic City within days."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-author">Marco Vitali</div>
+          <div class="testi-role">Rented in KAEC</div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <p class="testi-quote">"After working with several brokerages, VISTA stands in a class of their own. Their agent Sarah understood exactly what we were looking for and made the entire experience completely seamless."</p>
+          <div class="testi-divider"></div>
+          <div class="testi-author">Abdullah Mirza</div>
+          <div class="testi-role">Investment Property, Jeddah</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SERVICES ===================== -->
+  <section class="services-section">
+    <div class="services-inner">
+      <div class="services-header">
+        <span class="section-label">Services</span>
+        <h2 class="reveal-heading" data-split>
+          <span class="line"><span class="word-inner">How VISTA</span></span>
+          <span class="line"><em><span class="word-inner">Can Help You</span></em></span>
+        </h2>
+        <p class="services-subtext">Our certified agents guide you through every stage of real estate with expert knowledge and reliable support.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80" alt="Buy" />
+          <div class="service-card-overlay"></div>
+          <div class="service-card-content">
+            <div class="service-card-title">Buy</div>
+            <p class="service-card-text">Buy smarter with expert agents backed by mortgage, legal, and appraisal pros — dialed in to get you the best deal, fast. We've closed over 5,000 transactions across Saudi Arabia.</p>
+            <span class="service-card-link">Learn More →</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80" alt="Sell" />
+          <div class="service-card-overlay"></div>
+          <div class="service-card-content">
+            <div class="service-card-title">Sell</div>
+            <p class="service-card-text">Sell fast, sell high. Your listing gets professional staging, strategic pricing, targeted marketing, and agents who never stop working until the right buyer signs.</p>
+            <span class="service-card-link">Learn More →</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80" alt="Rent" />
+          <div class="service-card-overlay"></div>
+          <div class="service-card-content">
+            <div class="service-card-title">Rent</div>
+            <p class="service-card-text">Access premium rentals before they hit the market through agents who know every landlord and building manager in Jeddah and Riyadh. We unlock the best deals you won't find online.</p>
+            <span class="service-card-link">Learn More →</span>
+          </div>
+        </div>
+      </div>
+      <div class="services-cta-bar">
+        <p class="services-cta-text">Our certified agents guide you through every stage with expert knowledge and reliable support.</p>
+        <a href="#" class="services-cta-btn">Get Started with VISTA</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SUPPORT ===================== -->
+  <section class="support-section">
+    <div class="support-inner">
+      <div class="support-top">
+        <div>
+          <span class="section-label">Beyond the Sale</span>
+          <h2 class="support-heading reveal-heading" data-split>
+            <span class="line"><span class="word-inner">Support Beyond</span></span>
+            <span class="line"><em><span class="word-inner">Buying & Selling</span></em></span>
+          </h2>
+        </div>
+        <a href="#" class="support-sublink">Discover Our Services</a>
+      </div>
+      <div class="support-grid">
+        <div class="support-card">
+          <div class="support-card-img">
+            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80" alt="Mortgage" />
+          </div>
+          <div class="support-card-title">Mortgage Services</div>
+          <p class="support-card-text">Helping you secure your dream home with flexible mortgage options tailored to Saudi Arabia's regulatory landscape.</p>
+          <a href="#" class="support-card-link">Learn More →</a>
+        </div>
+        <div class="support-card">
+          <div class="support-card-img">
+            <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=800&q=80" alt="Property Management" />
+          </div>
+          <div class="support-card-title">Property Management</div>
+          <p class="support-card-text">Let us handle the details so you can enjoy the rewards. Full-service management for residential and commercial properties.</p>
+          <a href="#" class="support-card-link">Learn More →</a>
+        </div>
+        <div class="support-card">
+          <div class="support-card-img">
+            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80" alt="Development" />
+          </div>
+          <div class="support-card-title">Construction & Development</div>
+          <p class="support-card-text">Guiding you through the intricacies of building and developing properties with expert insight and end-to-end support.</p>
+          <a href="#" class="support-card-link">Learn More →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BLOG ===================== -->
+  <section class="blog-section">
+    <div class="blog-inner">
+      <div class="blog-top">
+        <div>
+          <span class="section-label">Insights</span>
+          <h2 class="blog-heading reveal-heading" data-split>
+            <span class="line"><span class="word-inner">Blog &amp; Resources</span></span>
+          </h2>
+        </div>
+        <a href="#" class="blog-link">Visit Our Blog</a>
+      </div>
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="blog-card-img">
+            <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80" alt="Blog 1" />
+          </div>
+          <div class="blog-date">April 13, 2026</div>
+          <h3 class="blog-title">Q1 2026 Saudi Real Estate Market Report</h3>
+          <p class="blog-excerpt">Q1 2026 saw strong residential demand in Jeddah and Riyadh, with rental yields stabilising as Vision 2030 projects accelerate across the Kingdom.</p>
+          <a href="#" class="blog-read">Read More →</a>
+        </div>
+        <div class="blog-card">
+          <div class="blog-card-img">
+            <img src="https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=800&q=80" alt="Blog 2" />
+          </div>
+          <div class="blog-date">April 1, 2026</div>
+          <h3 class="blog-title">Jeddah Corniche: A Market Analysis</h3>
+          <p class="blog-excerpt">Record-low inventory and steady price growth define a unique quarter for Saudi Arabia's most coveted coastal real estate corridor.</p>
+          <a href="#" class="blog-read">Read More →</a>
+        </div>
+        <div class="blog-card">
+          <div class="blog-card-img">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" alt="Blog 3" />
+          </div>
+          <div class="blog-date">March 9, 2026</div>
+          <h3 class="blog-title">What SAR 2M Buys Across Saudi Arabia</h3>
+          <p class="blog-excerpt">Curious what your budget can achieve across Jeddah, Riyadh, and NEOM? Explore our snapshot of available listings at this key price point.</p>
+          <a href="#" class="blog-read">Read More →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="cta-section" id="ctaSection">
+    <div class="cta-bg" id="ctaBg"></div>
+    <div class="cta-overlay"></div>
+    <div class="cta-content">
+      <h2 class="cta-heading" id="ctaHeading">
+        <span class="line"><span class="word-inner">Find <em>You.</em></span></span>
+        <span class="line"><span class="word-inner">We'll Help</span></span>
+        <span class="line"><span class="word-inner">You Get There.</span></span>
+      </h2>
+      <a href="#" class="cta-btn" id="ctaBtn">Let's Get Started</a>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">VISTA<span>.</span></div>
+        <p class="footer-desc">Your life's changing. Don't just find a place — find what's next. We help you move forward with clarity, confidence, and the right agent by your side.</p>
+        <div class="footer-newsletter">
+          <input type="email" placeholder="Subscribe to our newsletter" />
+          <button>Subscribe</button>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navigate</div>
+        <ul class="footer-links">
+          <li><a href="#">Search Properties</a></li>
+          <li><a href="#">Our Agents</a></li>
+          <li><a href="#">Join VISTA</a></li>
+          <li><a href="#">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <ul class="footer-links">
+          <li><a href="#">Buy</a></li>
+          <li><a href="#">Sell</a></li>
+          <li><a href="#">Rent</a></li>
+          <li><a href="#">Mortgage</a></li>
+          <li><a href="#">Property Management</a></li>
+          <li><a href="#">Development</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contact</div>
+        <p>King Fahd Road, Al-Hamra District<br>Jeddah, Saudi Arabia 23523</p>
+        <br>
+        <p><a href="mailto:hello@vistarealestate.sa">hello@vistarealestate.sa</a></p>
+        <p><a href="tel:+966112345678">+966 11 234 5678</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">Copyright © 2026 VISTA Real Estate. All rights reserved.</p>
+      <div class="footer-socials">
+        <a href="#">Instagram</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Twitter</a>
+        <a href="#">YouTube</a>
+      </div>
+      <div class="footer-legal">
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Fair Housing</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== GSAP ===================== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Lenis smooth scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+  <script>
+    /* ============================================================
+       GSAP FEATURES IMPLEMENTED:
+       1.  gsap.registerPlugin(ScrollTrigger)
+       2.  Lenis smooth scroll synced with GSAP ticker + ScrollTrigger
+       3.  Hero entrance gsap.timeline() — staggered word reveals
+       4.  Hero multi-layer parallax (6 layers, scrub: true, different speeds)
+       5.  Nav ScrollTrigger — background/class toggle on scroll
+       6.  ScrollTrigger.create() — general trigger setup
+       7.  Reveal headings — custom word split with overflow clip
+       8.  Image sequence reveal — staggered with ScrollTrigger
+       9.  Steps stagger — ScrollTrigger.batch()
+       10. Agents section — fromTo() with opposite directions
+       11. Testimonials horizontal scroll — pin + scrub xPercent
+       12. Services cards — ScrollTrigger.batch() stagger reveal
+       13. Support cards — stagger reveal
+       14. Blog cards — stagger reveal
+       15. CTA section — parallax bg + word reveal + fade-up button
+       16. Custom cursor — mousemove with gsap.quickTo()
+       17. gsap.matchMedia() — responsive disabling
+       18. Image scale on scroll (scrub) for hero house
+    ============================================================ */
+
+    /* 1. Register plugin */
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ============================================================
+       2. LENIS SMOOTH SCROLL
+    ============================================================ */
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+
+    /* ============================================================
+       16. CUSTOM CURSOR (quick animations)
+    ============================================================ */
+    const cursor = document.getElementById('cursor');
+    const follower = document.getElementById('cursorFollower');
+
+    const xCursor   = gsap.quickTo(cursor,   'x', { duration: 0.1 });
+    const yCursor   = gsap.quickTo(cursor,   'y', { duration: 0.1 });
+    const xFollower = gsap.quickTo(follower, 'x', { duration: 0.4, ease: 'power3' });
+    const yFollower = gsap.quickTo(follower, 'y', { duration: 0.4, ease: 'power3' });
+
+    window.addEventListener('mousemove', (e) => {
+      xCursor(e.clientX - 6);
+      yCursor(e.clientY - 6);
+      xFollower(e.clientX - 20);
+      yFollower(e.clientY - 20);
+    });
+
+    document.querySelectorAll('a, button, .service-card, .blog-card').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        gsap.to(follower, { scale: 2, borderColor: 'rgba(201,169,110,0.7)', duration: 0.4 });
+        gsap.to(cursor, { scale: 0.5, duration: 0.3 });
+      });
+      el.addEventListener('mouseleave', () => {
+        gsap.to(follower, { scale: 1, borderColor: 'rgba(201,169,110,0.4)', duration: 0.4 });
+        gsap.to(cursor, { scale: 1, duration: 0.3 });
+      });
+    });
+
+    /* ============================================================
+       3. HERO ENTRANCE TIMELINE
+    ============================================================ */
+    const heroTL = gsap.timeline({ delay: 0.2 });
+
+    heroTL
+      .from('#mainNav', {
+        y: -80,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out'
+      })
+      .to('#heroHeadline .word-inner', {
+        y: 0,
+        opacity: 1,
+        duration: 1.4,
+        stagger: 0.12,
+        ease: 'power4.out'
+      }, '-=0.5')
+      .to('#heroSub', {
+        y: 0,
+        opacity: 1,
+        duration: 0.9,
+        ease: 'power3.out'
+      }, '-=0.8')
+      .to('#heroBtn', {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power3.out'
+      }, '-=0.7')
+      .to('#scrollIndicator', {
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power2.out'
+      }, '-=0.4');
+
+    /* ============================================================
+       4. HERO MULTI-LAYER PARALLAX (scrub)
+    ============================================================ */
+    const heroParallaxDefaults = {
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      }
+    };
+
+    // Layer 1 – Background (slowest)
+    gsap.to('#heroBg', {
+      yPercent: 40,
+      ease: 'none',
+      ...heroParallaxDefaults
+    });
+
+    // Layer 2 – House (moves up faster → creates depth)
+    gsap.to('#heroHouse', {
+      yPercent: -25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.5,
+      }
+    });
+
+    // Layer 3 – Cloud left (diagonal)
+    gsap.to('#cloudL', {
+      xPercent: -20,
+      yPercent: -15,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 2,
+      }
+    });
+
+    // Layer 4 – Cloud right (opposite diagonal)
+    gsap.to('#cloudR', {
+      xPercent: 20,
+      yPercent: -10,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 2,
+      }
+    });
+
+    // Layer 5 – Smoke left (upward fast)
+    gsap.to('#smokeL', {
+      yPercent: -60,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'center top',
+        scrub: 1,
+      }
+    });
+
+    // Layer 6 – Smoke right
+    gsap.to('#smokeR', {
+      yPercent: -50,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'center top',
+        scrub: 1,
+      }
+    });
+
+    // Hero content fades as you scroll
+    gsap.to('.hero-content', {
+      yPercent: 30,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: '40% top',
+        scrub: 1,
+      }
+    });
+
+    /* ============================================================
+       5. NAV — class toggle via ScrollTrigger
+    ============================================================ */
+    ScrollTrigger.create({
+      start: 'top -80px',
+      onUpdate: (self) => {
+        const nav = document.getElementById('mainNav');
+        if (self.progress > 0) {
+          nav.classList.add('nav--scrolled');
+        } else {
+          nav.classList.remove('nav--scrolled');
+        }
+      }
+    });
+
+    /* ============================================================
+       7. REVEAL HEADINGS (word split with clip)
+       Custom implementation — SplitText requires Club GSAP
+    ============================================================ */
+    document.querySelectorAll('.reveal-heading[data-split]').forEach(el => {
+      // Already split in HTML — just animate .word-inner elements
+      const words = el.querySelectorAll('.word-inner');
+      gsap.to(words, {
+        y: 0,
+        opacity: 1,
+        duration: 1.2,
+        stagger: 0.08,
+        ease: 'power4.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        }
+      });
+    });
+
+    /* ============================================================
+       8. IMAGE SEQUENCE REVEAL
+    ============================================================ */
+    gsap.from(['#seqImg1','#seqImg2','#seqImg3','#seqImg4'], {
+      opacity: 0,
+      y: 60,
+      scale: 0.96,
+      stagger: 0.12,
+      duration: 1.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#imgSeqPin',
+        start: 'top 75%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // Images scale up subtly on scroll (scrub)
+    gsap.to('.seq-img img', {
+      scale: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#imgSeqPin',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1,
+      }
+    });
+
+    /* ============================================================
+       9. STEPS — ScrollTrigger.batch()
+    ============================================================ */
+    ScrollTrigger.batch('.step-item', {
+      onEnter: (batch) => {
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          stagger: 0.2,
+          ease: 'power3.out',
+        });
+      },
+      start: 'top 85%',
+    });
+
+    /* ============================================================
+       10. AGENTS — fromTo opposite directions
+    ============================================================ */
+    gsap.fromTo('#agentsImgs',
+      { x: -80, opacity: 0 },
+      {
+        x: 0, opacity: 1,
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#agentsImgs',
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    gsap.fromTo('#agentsContent',
+      { x: 80, opacity: 0 },
+      {
+        x: 0, opacity: 1,
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#agentsContent',
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        }
+      }
+    );
+
+    /* ============================================================
+       11. TESTIMONIALS HORIZONTAL SCROLL (pin + scrub)
+    ============================================================ */
+    const testiTrack = document.getElementById('testiTrack');
+    const testiSection = document.getElementById('testiSection');
+
+    // Calculate total scrollable width
+    function setupTestiScroll() {
+      const trackWidth = testiTrack.scrollWidth;
+      const viewportWidth = window.innerWidth;
+      const totalMove = trackWidth - viewportWidth + 128; // 128 = 2 × 4rem padding
+
+      if (trackWidth > viewportWidth) {
+        gsap.to(testiTrack, {
+          x: -totalMove,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: testiSection,
+            pin: true,
+            scrub: 1,
+            start: 'top top',
+            end: () => `+=${totalMove}`,
+            invalidateOnRefresh: true,
+          }
+        });
+      }
+    }
+    setupTestiScroll();
+
+    /* ============================================================
+       12. SERVICES CARDS — batch stagger
+    ============================================================ */
+    gsap.from('.service-card', {
+      opacity: 0,
+      y: 80,
+      scale: 0.97,
+      stagger: 0.18,
+      duration: 1.1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.services-grid',
+        start: 'top 80%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ============================================================
+       13. SUPPORT CARDS — stagger reveal
+    ============================================================ */
+    gsap.from('.support-card', {
+      opacity: 0,
+      y: 70,
+      stagger: 0.2,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.support-grid',
+        start: 'top 82%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ============================================================
+       14. BLOG CARDS — stagger reveal
+    ============================================================ */
+    gsap.from('.blog-card', {
+      opacity: 0,
+      y: 60,
+      stagger: 0.18,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.blog-grid',
+        start: 'top 82%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ============================================================
+       15. CTA — parallax bg + word reveal + fade-up button
+    ============================================================ */
+    gsap.to('#ctaBg', {
+      yPercent: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#ctaSection',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1,
+      }
+    });
+
+    gsap.to('#ctaHeading .word-inner', {
+      y: 0,
+      opacity: 1,
+      duration: 1.3,
+      stagger: 0.1,
+      ease: 'power4.out',
+      scrollTrigger: {
+        trigger: '#ctaHeading',
+        start: 'top 80%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    gsap.to('#ctaBtn', {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#ctaBtn',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ============================================================
+       General section text/element reveals
+    ============================================================ */
+    // Why section body text
+    gsap.from('.why-text, .why-left .text-link', {
+      opacity: 0,
+      y: 30,
+      duration: 1,
+      stagger: 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.why-text',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // Why media reveal
+    gsap.from('.why-media', {
+      opacity: 0,
+      x: 50,
+      duration: 1.2,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.why-media',
+        start: 'top 80%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // notjust body text
+    gsap.from('.notjust-body', {
+      opacity: 0,
+      y: 40,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.notjust-body',
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // testimonials header
+    gsap.from('.testimonials-header h2, .testimonials-header .section-label', {
+      opacity: 0,
+      y: 30,
+      stagger: 0.12,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.testimonials-header',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // footer
+    gsap.from('.footer-top > div', {
+      opacity: 0,
+      y: 30,
+      stagger: 0.12,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.footer-top',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // section labels
+    gsap.utils.toArray('.section-label').forEach(el => {
+      gsap.from(el, {
+        opacity: 0,
+        x: -20,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          toggleActions: 'play none none none',
+        }
+      });
+    });
+
+    // steps CTA
+    gsap.from('.steps-top .text-link', {
+      opacity: 0,
+      x: 20,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.steps-top',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // agents body text / btn
+    gsap.from('.agents-body, .agents-btn', {
+      opacity: 0,
+      y: 20,
+      stagger: 0.12,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.agents-body',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // Services CTA bar
+    gsap.from('.services-cta-bar > *', {
+      opacity: 0,
+      y: 20,
+      stagger: 0.15,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.services-cta-bar',
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // Support top
+    gsap.from('.support-top > *', {
+      opacity: 0,
+      y: 20,
+      stagger: 0.12,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.support-top',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    // Blog top
+    gsap.from('.blog-top > *', {
+      opacity: 0,
+      y: 20,
+      stagger: 0.12,
+      duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.blog-top',
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ============================================================
+       17. gsap.matchMedia() — disable parallax on mobile
+    ============================================================ */
+    const mm = gsap.matchMedia();
+
+    mm.add('(max-width: 768px)', () => {
+      // Kill all ScrollTrigger instances that use scrub on mobile
+      ScrollTrigger.getAll().forEach(t => {
+        if (t.vars.scrub) t.kill();
+      });
+      // Reset transforms
+      gsap.set(['#heroBg','#heroHouse','#cloudL','#cloudR','#smokeL','#smokeR'], { clearProps: 'all' });
+    });
+
+    /* ============================================================
+       Refresh after load for accurate positions
+    ============================================================ */
+    window.addEventListener('load', () => {
+      ScrollTrigger.refresh();
+    });
+  </script>
+</body>
+</html>
