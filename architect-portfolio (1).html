@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARKE Studio — Architecture & Interior Design</title>
+
+<!-- GSAP + Plugins -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Geist+Mono:wght@200;300;400&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #F2EDE6;
+  --bone: #E8E0D5;
+  --charcoal: #1A1814;
+  --warm-black: #0E0D0B;
+  --amber: #C8963E;
+  --rust: #8B4513;
+  --smoke: #8A8278;
+  --linen: #D4C9BA;
+  --serif: 'Cormorant Garamond', serif;
+  --mono: 'Geist Mono', monospace;
+}
+
+html { scroll-behavior: auto; overflow-x: hidden; }
+
+body {
+  background: var(--warm-black);
+  color: var(--cream);
+  font-family: var(--serif);
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+  mix-blend-mode: difference;
+}
+#cursor-dot {
+  width: 8px; height: 8px; background: var(--cream);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  position: absolute; transition: width .2s, height .2s;
+}
+#cursor-ring {
+  width: 40px; height: 40px; border: 1px solid rgba(242,237,230,0.5);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  position: absolute; transition: width .3s, height .3s, opacity .3s;
+}
+body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { width: 70px; height: 70px; opacity: 0.3; }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0; background: var(--warm-black);
+  z-index: 9998; display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#loader-count {
+  font-family: var(--mono); font-size: clamp(4rem, 12vw, 9rem);
+  font-weight: 200; color: var(--cream); letter-spacing: -0.04em;
+  line-height: 1; overflow: hidden;
+}
+#loader-bar {
+  position: absolute; bottom: 0; left: 0; height: 2px;
+  background: var(--amber); width: 0%;
+}
+#loader-label {
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.3em;
+  color: var(--smoke); text-transform: uppercase; margin-top: 1rem;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 2rem 3rem; display: flex; align-items: center; justify-content: space-between;
+  mix-blend-mode: difference;
+}
+.nav-logo {
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--cream); text-decoration: none;
+}
+.nav-links { display: flex; gap: 3rem; list-style: none; }
+.nav-links a {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--cream); text-decoration: none;
+  opacity: 0.5; transition: opacity 0.3s;
+  position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px;
+  background: var(--amber); transition: width 0.4s ease;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-links a:hover::after { width: 100%; }
+
+/* ── HERO ── */
+#hero {
+  height: 100vh; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 0 3rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; overflow: hidden;
+}
+.hero-bg-img {
+  width: 100%; height: 120%; object-fit: cover;
+  filter: brightness(0.3) contrast(1.1);
+  transform-origin: center center;
+}
+.hero-noise {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: 0.5;
+}
+.hero-grid-overlay {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(200,150,62,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,150,62,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.hero-number {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 1.5rem;
+  opacity: 0;
+}
+.hero-title {
+  font-size: clamp(4rem, 9vw, 10rem); font-weight: 300;
+  line-height: 0.92; letter-spacing: -0.02em;
+  overflow: hidden; margin-bottom: 2rem;
+}
+.hero-title .line { overflow: hidden; display: block; }
+.hero-title em { font-style: italic; color: var(--amber); }
+.hero-bottom {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-top: 2rem;
+}
+.hero-desc {
+  font-family: var(--mono); font-size: 0.7rem; line-height: 1.8;
+  color: var(--smoke); max-width: 280px; letter-spacing: 0.05em; opacity: 0;
+}
+.hero-cta {
+  display: flex; align-items: center; gap: 1rem;
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--cream); text-decoration: none;
+  border: 1px solid rgba(242,237,230,0.2); padding: 1rem 2rem;
+  transition: all 0.4s ease; opacity: 0;
+  position: relative; overflow: hidden;
+}
+.hero-cta::before {
+  content: ''; position: absolute; inset: 0; background: var(--amber);
+  transform: translateX(-101%); transition: transform 0.4s cubic-bezier(0.76,0,0.24,1);
+}
+.hero-cta:hover::before { transform: translateX(0); }
+.hero-cta span { position: relative; z-index: 1; }
+.hero-cta:hover { color: var(--warm-black); border-color: var(--amber); }
+.scroll-hint {
+  position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem; opacity: 0;
+}
+.scroll-line {
+  width: 1px; height: 60px; background: linear-gradient(to bottom, var(--amber), transparent);
+  transform-origin: top; animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(0.5); opacity: 0.3; }
+}
+.scroll-txt { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.4em; color: var(--smoke); }
+
+/* ── MARQUEE ── */
+.marquee-section {
+  background: var(--amber); padding: 1.2rem 0; overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.marquee-track {
+  display: flex; gap: 3rem; white-space: nowrap;
+  animation: marqueeScroll 20s linear infinite;
+}
+.marquee-track span {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--warm-black); font-weight: 400;
+}
+.marquee-dot { color: var(--warm-black); opacity: 0.4; }
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── ABOUT SECTION ── */
+#about {
+  padding: 12rem 3rem; display: grid;
+  grid-template-columns: 1fr 1.4fr; gap: 8rem; align-items: center;
+}
+.about-left .section-label {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.4em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-label::before {
+  content: ''; display: block; width: 40px; height: 1px; background: var(--amber);
+}
+.about-left h2 {
+  font-size: clamp(2.5rem, 4vw, 4.5rem); font-weight: 300;
+  line-height: 1.1; letter-spacing: -0.02em;
+}
+.about-left h2 em { font-style: italic; color: var(--amber); }
+.about-stats {
+  margin-top: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+.stat-item {}
+.stat-num {
+  font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; letter-spacing: -0.04em;
+  color: var(--cream); line-height: 1;
+}
+.stat-num span { color: var(--amber); }
+.stat-label {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em;
+  color: var(--smoke); text-transform: uppercase; margin-top: 0.5rem;
+}
+.about-right p {
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem); font-weight: 300; line-height: 1.8;
+  color: var(--linen); margin-bottom: 2rem;
+}
+.about-img-wrap {
+  margin-top: 3rem; position: relative; overflow: hidden;
+  height: 300px;
+}
+.about-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7) contrast(1.05);
+}
+.about-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,150,62,0.15), transparent 60%);
+}
+
+/* ── PROJECTS ── */
+#projects { padding: 8rem 0; }
+.projects-header {
+  padding: 0 3rem; display: flex; justify-content: space-between;
+  align-items: flex-end; margin-bottom: 5rem;
+}
+.projects-header h2 {
+  font-size: clamp(3rem, 6vw, 7rem); font-weight: 300;
+  letter-spacing: -0.03em; line-height: 0.9;
+}
+.projects-header h2 em { font-style: italic; color: var(--amber); }
+.projects-header-right {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em;
+  color: var(--smoke); max-width: 200px; text-align: right; line-height: 1.8;
+}
+
+/* Horizontal scroll container */
+.projects-scroll-outer {
+  overflow: hidden; position: relative;
+}
+.projects-track {
+  display: flex; gap: 2px; padding: 0 3rem;
+  will-change: transform;
+}
+.project-card {
+  flex-shrink: 0; width: clamp(280px, 30vw, 420px);
+  position: relative; overflow: hidden; cursor: none;
+}
+.project-card-inner {
+  position: relative; overflow: hidden;
+  height: clamp(380px, 50vh, 560px);
+}
+.project-img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(0.6) contrast(1.1) grayscale(0.2);
+  transition: filter 0.8s ease; transform-origin: center;
+}
+.project-card:hover .project-img { filter: brightness(0.75) contrast(1.1) grayscale(0); }
+.project-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(14,13,11,0.9) 0%, transparent 60%);
+}
+.project-info {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem;
+  transform: translateY(10px); transition: transform 0.5s ease;
+}
+.project-card:hover .project-info { transform: translateY(0); }
+.project-num {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 0.75rem;
+}
+.project-name {
+  font-size: clamp(1.4rem, 2vw, 2rem); font-weight: 300; line-height: 1.1;
+  letter-spacing: -0.01em; margin-bottom: 0.5rem;
+}
+.project-type {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  color: var(--smoke); text-transform: uppercase;
+  transform: translateY(10px); opacity: 0;
+  transition: all 0.5s ease 0.1s;
+}
+.project-card:hover .project-type { transform: translateY(0); opacity: 1; }
+.project-hover-line {
+  position: absolute; top: 0; left: 0; width: 3px; height: 0;
+  background: var(--amber); transition: height 0.6s cubic-bezier(0.76,0,0.24,1);
+}
+.project-card:hover .project-hover-line { height: 100%; }
+
+/* ── PHILOSOPHY ── */
+#philosophy {
+  padding: 12rem 3rem; background: var(--cream); color: var(--charcoal);
+  position: relative; overflow: hidden;
+}
+.philosophy-bg-text {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: clamp(10rem, 20vw, 22rem); font-weight: 300; letter-spacing: -0.05em;
+  color: rgba(26,24,20,0.04); white-space: nowrap; pointer-events: none;
+  font-style: italic; line-height: 1;
+}
+.philosophy-inner {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto; text-align: center;
+}
+.philosophy-label {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.4em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 3rem;
+}
+.philosophy-quote {
+  font-size: clamp(2rem, 4vw, 4.5rem); font-weight: 300;
+  line-height: 1.2; letter-spacing: -0.02em; color: var(--charcoal);
+}
+.philosophy-quote em { font-style: italic; }
+.philosophy-divider {
+  width: 80px; height: 1px; background: var(--amber); margin: 3rem auto;
+}
+.philosophy-body {
+  font-family: var(--mono); font-size: 0.75rem; line-height: 2;
+  color: var(--smoke); letter-spacing: 0.05em; max-width: 600px; margin: 0 auto;
+}
+
+/* ── SERVICES ── */
+#services {
+  padding: 10rem 3rem; background: var(--warm-black);
+}
+.services-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: rgba(242,237,230,0.08);
+  margin-top: 5rem; border: 1px solid rgba(242,237,230,0.08);
+}
+.service-item {
+  padding: 3rem 2.5rem; background: var(--warm-black);
+  position: relative; overflow: hidden;
+  transition: background 0.5s ease;
+}
+.service-item::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 0; height: 100%;
+  background: rgba(200,150,62,0.05); transition: width 0.6s cubic-bezier(0.76,0,0.24,1);
+}
+.service-item:hover::before { width: 100%; }
+.service-item:hover { background: rgba(200,150,62,0.03); }
+.service-num {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em;
+  color: var(--amber); margin-bottom: 2rem;
+}
+.service-item h3 {
+  font-size: clamp(1.3rem, 2vw, 2rem); font-weight: 300;
+  letter-spacing: -0.01em; margin-bottom: 1.5rem; line-height: 1.1;
+}
+.service-item p {
+  font-family: var(--mono); font-size: 0.65rem; line-height: 1.9;
+  color: var(--smoke); letter-spacing: 0.03em;
+}
+.service-arrow {
+  position: absolute; bottom: 2.5rem; right: 2.5rem;
+  width: 36px; height: 36px; border: 1px solid rgba(242,237,230,0.15);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: var(--smoke); font-size: 0.8rem;
+  transform: rotate(-45deg); transition: all 0.4s ease;
+}
+.service-item:hover .service-arrow {
+  border-color: var(--amber); color: var(--amber); transform: rotate(0deg);
+}
+
+/* ── FEATURED FULL ── */
+#featured {
+  height: 100vh; position: relative; overflow: hidden;
+}
+.featured-bg {
+  position: absolute; inset: 0;
+}
+.featured-bg img {
+  width: 100%; height: 110%; object-fit: cover;
+  filter: brightness(0.3);
+}
+.featured-content {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  justify-content: center; padding: 0 3rem;
+  background: linear-gradient(90deg, rgba(14,13,11,0.7) 0%, transparent 70%);
+}
+.featured-tag {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.4em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 2rem;
+}
+.featured-title {
+  font-size: clamp(3rem, 7vw, 9rem); font-weight: 300;
+  line-height: 0.9; letter-spacing: -0.03em; max-width: 700px;
+  margin-bottom: 2.5rem;
+}
+.featured-title em { font-style: italic; color: var(--amber); }
+.featured-meta {
+  display: flex; gap: 3rem; margin-bottom: 3rem;
+}
+.featured-meta-item {}
+.featured-meta-label {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.3em;
+  color: var(--smoke); text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.featured-meta-val {
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--cream);
+}
+
+/* ── PROCESS ── */
+#process {
+  padding: 12rem 3rem;
+  background: linear-gradient(180deg, var(--warm-black) 0%, #111009 100%);
+}
+.process-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 3rem;
+  margin-top: 5rem;
+}
+.process-step { position: relative; }
+.process-line {
+  position: absolute; top: 1.5rem; left: calc(100% + 1.5rem); right: -1.5rem;
+  height: 1px; background: rgba(200,150,62,0.2);
+}
+.process-step:last-child .process-line { display: none; }
+.process-step-num {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em;
+  color: var(--amber); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.process-step-num::before {
+  content: ''; display: block; width: 12px; height: 12px;
+  border: 1px solid var(--amber); border-radius: 50%;
+  background: transparent;
+}
+.process-step h3 {
+  font-size: 1.4rem; font-weight: 300; margin-bottom: 1rem; line-height: 1.1;
+}
+.process-step p {
+  font-family: var(--mono); font-size: 0.62rem; line-height: 1.9;
+  color: var(--smoke); letter-spacing: 0.03em;
+}
+
+/* ── TESTIMONIAL ── */
+#testimonial {
+  padding: 10rem 3rem; background: var(--charcoal);
+  border-top: 1px solid rgba(200,150,62,0.15);
+  border-bottom: 1px solid rgba(200,150,62,0.15);
+}
+.testimonial-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+.testimonial-quote {
+  font-size: clamp(1.5rem, 2.5vw, 2.8rem); font-weight: 300;
+  line-height: 1.4; letter-spacing: -0.01em; margin-bottom: 3rem;
+}
+.testimonial-quote em { font-style: italic; color: var(--amber); }
+.testimonial-author {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.3em;
+  color: var(--smoke); text-transform: uppercase;
+}
+.testimonial-author span { color: var(--amber); }
+
+/* ── CONTACT ── */
+#contact {
+  padding: 12rem 3rem; background: var(--warm-black);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8rem; align-items: center;
+}
+.contact-left h2 {
+  font-size: clamp(3rem, 6vw, 7rem); font-weight: 300;
+  line-height: 0.9; letter-spacing: -0.03em; margin-bottom: 3rem;
+}
+.contact-left h2 em { font-style: italic; color: var(--amber); }
+.contact-left p {
+  font-family: var(--mono); font-size: 0.7rem; line-height: 1.9;
+  color: var(--smoke); letter-spacing: 0.05em; max-width: 360px; margin-bottom: 3rem;
+}
+.contact-details { display: flex; flex-direction: column; gap: 1.5rem; }
+.contact-item {}
+.contact-item-label {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.4em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.contact-item-val {
+  font-family: var(--serif); font-size: 1.1rem; color: var(--cream);
+}
+.contact-form { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-field { position: relative; }
+.form-field input, .form-field textarea {
+  width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(242,237,230,0.15);
+  padding: 1rem 0; color: var(--cream); font-family: var(--mono); font-size: 0.75rem;
+  letter-spacing: 0.05em; outline: none; transition: border-color 0.3s;
+  resize: none;
+}
+.form-field input::placeholder, .form-field textarea::placeholder {
+  color: var(--smoke); text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.65rem;
+}
+.form-field input:focus, .form-field textarea:focus { border-bottom-color: var(--amber); }
+.form-field textarea { height: 100px; }
+.form-submit {
+  background: transparent; border: 1px solid rgba(242,237,230,0.2);
+  color: var(--cream); font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.35em; text-transform: uppercase; padding: 1.2rem 2.5rem;
+  cursor: none; transition: all 0.4s ease; align-self: flex-start;
+  position: relative; overflow: hidden;
+}
+.form-submit::before {
+  content: ''; position: absolute; inset: 0; background: var(--amber);
+  transform: translateX(-101%); transition: transform 0.4s cubic-bezier(0.76,0,0.24,1);
+}
+.form-submit:hover::before { transform: translateX(0); }
+.form-submit span { position: relative; z-index: 1; }
+.form-submit:hover { color: var(--warm-black); border-color: var(--amber); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 3rem; border-top: 1px solid rgba(242,237,230,0.08);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-logo {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--smoke);
+}
+.footer-copy {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  color: rgba(138,130,120,0.4); text-transform: uppercase;
+}
+.footer-socials { display: flex; gap: 2rem; }
+.footer-socials a {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  color: var(--smoke); text-decoration: none; text-transform: uppercase;
+  transition: color 0.3s;
+}
+.footer-socials a:hover { color: var(--amber); }
+
+/* ── REVEAL CLASSES ── */
+.reveal-up { overflow: hidden; }
+.reveal-up-inner { transform: translateY(100%); will-change: transform; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  #about { grid-template-columns: 1fr; gap: 4rem; }
+  .services-grid { grid-template-columns: 1fr; }
+  .process-grid { grid-template-columns: 1fr 1fr; }
+  #contact { grid-template-columns: 1fr; gap: 4rem; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor">
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+</div>
+
+<!-- Loader -->
+<div id="loader">
+  <div id="loader-count">00</div>
+  <div id="loader-label">Loading Experience</div>
+  <div id="loader-bar"></div>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <a href="#" class="nav-logo">ARKE Studio</a>
+  <ul class="nav-links">
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-bg">
+    <img class="hero-bg-img" src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=80" alt="Architecture">
+    <div class="hero-noise"></div>
+    <div class="hero-grid-overlay"></div>
+  </div>
+
+  <p class="hero-number">— 2025 / Architecture & Interior</p>
+
+  <h1 class="hero-title">
+    <span class="line"><span class="reveal-word">Space is</span></span>
+    <span class="line"><em><span class="reveal-word">poetry</span></em></span>
+    <span class="line"><span class="reveal-word">in form.</span></span>
+  </h1>
+
+  <div class="hero-bottom">
+    <p class="hero-desc">
+      We craft spaces that transcend function — environments where<br>
+      architecture and interior become a single, unified language.
+    </p>
+    <a href="#projects" class="hero-cta"><span>View Selected Work</span> <span>→</span></a>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-txt">Scroll</span>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marquee">
+    <span>Architecture</span><span class="marquee-dot">◆</span>
+    <span>Interior Design</span><span class="marquee-dot">◆</span>
+    <span>Spatial Experience</span><span class="marquee-dot">◆</span>
+    <span>Landscape</span><span class="marquee-dot">◆</span>
+    <span>Brand Environments</span><span class="marquee-dot">◆</span>
+    <span>Residential</span><span class="marquee-dot">◆</span>
+    <span>Commercial</span><span class="marquee-dot">◆</span>
+    <span>Architecture</span><span class="marquee-dot">◆</span>
+    <span>Interior Design</span><span class="marquee-dot">◆</span>
+    <span>Spatial Experience</span><span class="marquee-dot">◆</span>
+    <span>Landscape</span><span class="marquee-dot">◆</span>
+    <span>Brand Environments</span><span class="marquee-dot">◆</span>
+    <span>Residential</span><span class="marquee-dot">◆</span>
+    <span>Commercial</span><span class="marquee-dot">◆</span>
+  </div>
+</div>
+
+<!-- About -->
+<section id="about">
+  <div class="about-left">
+    <div class="section-label">About the Studio</div>
+    <h2>Where <em>form</em><br>meets feeling</h2>
+    <div class="about-stats">
+      <div class="stat-item">
+        <div class="stat-num stat-counter" data-target="147">0<span>+</span></div>
+        <div class="stat-label">Projects Completed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num stat-counter" data-target="18">0<span>+</span></div>
+        <div class="stat-label">Years of Practice</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num stat-counter" data-target="32">0<span>+</span></div>
+        <div class="stat-label">Global Awards</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num stat-counter" data-target="9">0<span>+</span></div>
+        <div class="stat-label">Countries</div>
+      </div>
+    </div>
+  </div>
+  <div class="about-right">
+    <p>ARKE Studio is a multidisciplinary practice operating at the intersection of architecture, interior design, and spatial experience. We believe that the finest environments are neither designed nor decorated — they emerge from a deep understanding of light, material, and the human condition.</p>
+    <p>Founded in 2007, we have built a reputation for delivering work of extraordinary refinement across residential, commercial, and cultural projects worldwide.</p>
+    <div class="about-img-wrap">
+      <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80" alt="Interior">
+      <div class="about-img-overlay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects">
+  <div class="projects-header">
+    <h2>Selected<br><em>Work</em></h2>
+    <div class="projects-header-right">
+      A curated selection of projects from<br>
+      2019 – 2025 across disciplines.
+    </div>
+  </div>
+  <div class="projects-scroll-outer">
+    <div class="projects-track" id="projectsTrack">
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">01 / Residential</div>
+            <div class="project-name">Villa Solaris<br>Marrakech</div>
+            <div class="project-type">Desert Modernism · 2024</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">02 / Interior</div>
+            <div class="project-name">Onyx<br>Penthouse</div>
+            <div class="project-type">Luxury Interior · 2024</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">03 / Commercial</div>
+            <div class="project-name">The Meridian<br>Hotel, Tokyo</div>
+            <div class="project-type">Hospitality · 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">04 / Cultural</div>
+            <div class="project-name">Sable Arts<br>Foundation</div>
+            <div class="project-type">Cultural · 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">05 / Residential</div>
+            <div class="project-name">Casa Vento<br>Amalfi Coast</div>
+            <div class="project-type">Residential · 2022</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-inner">
+          <img class="project-img" src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=80" alt="Project">
+          <div class="project-overlay"></div>
+          <div class="project-hover-line"></div>
+          <div class="project-info">
+            <div class="project-num">06 / Retail</div>
+            <div class="project-name">Quartier<br>Concept Store</div>
+            <div class="project-type">Retail Design · 2022</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Philosophy -->
+<section id="philosophy">
+  <div class="philosophy-bg-text">Form</div>
+  <div class="philosophy-inner">
+    <div class="philosophy-label">Our Philosophy</div>
+    <blockquote class="philosophy-quote">
+      "We do not design spaces.<br>
+      We design <em>experiences</em><br>
+      that live in memory."
+    </blockquote>
+    <div class="philosophy-divider"></div>
+    <p class="philosophy-body">
+      Every project begins with listening — to the site, the light, the client's unspoken desires.
+      Material follows meaning. Detail follows concept. Beauty follows truth.
+    </p>
+  </div>
+</section>
+
+<!-- Services -->
+<section id="services">
+  <div class="section-label" style="padding: 0 0 0 0; margin-bottom: 1rem;">What We Do</div>
+  <h2 style="font-size: clamp(3rem,5vw,6rem); font-weight:300; letter-spacing:-0.03em; line-height:0.9;">
+    Our <em style="font-style:italic; color:var(--amber)">Services</em>
+  </h2>
+  <div class="services-grid">
+    <div class="service-item">
+      <div class="service-num">01</div>
+      <h3>Architecture<br>& Planning</h3>
+      <p>From concept to completion, we deliver architecture of enduring relevance — buildings that respond to place, climate, and culture with equal precision.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">02</div>
+      <h3>Interior<br>Design</h3>
+      <p>We curate environments that evolve from the architecture itself — where every surface, material, and object participates in a coherent spatial narrative.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">03</div>
+      <h3>Brand<br>Environments</h3>
+      <p>Physical spaces that embody brand identity — retail, hospitality, and cultural venues designed to communicate at an emotional register.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">04</div>
+      <h3>Landscape<br>Design</h3>
+      <p>The boundary between building and ground is where we find our most compelling opportunities. Gardens, courtyards, and terraces as living architecture.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">05</div>
+      <h3>Furniture<br>& Objects</h3>
+      <p>Custom furniture, lighting, and material sourcing — ensuring that every element within a space shares the same intention as the architecture itself.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">06</div>
+      <h3>Project<br>Consultancy</h3>
+      <p>Expert guidance for developers, institutions, and private clients at any stage — from brief development to design review and procurement oversight.</p>
+      <div class="service-arrow">↗</div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Full -->
+<section id="featured">
+  <div class="featured-bg">
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80" alt="Featured">
+  </div>
+  <div class="featured-content">
+    <div class="featured-tag">— Featured Project 2024</div>
+    <h2 class="featured-title">
+      Villa<br><em>Solaris</em>
+    </h2>
+    <div class="featured-meta">
+      <div class="featured-meta-item">
+        <div class="featured-meta-label">Location</div>
+        <div class="featured-meta-val">Marrakech, Morocco</div>
+      </div>
+      <div class="featured-meta-item">
+        <div class="featured-meta-label">Type</div>
+        <div class="featured-meta-val">Private Residence</div>
+      </div>
+      <div class="featured-meta-item">
+        <div class="featured-meta-label">Year</div>
+        <div class="featured-meta-val">2024</div>
+      </div>
+      <div class="featured-meta-item">
+        <div class="featured-meta-label">Area</div>
+        <div class="featured-meta-val">1,840 m²</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section id="process">
+  <div class="section-label" style="margin-bottom: 1rem;">How We Work</div>
+  <h2 style="font-size: clamp(3rem,5vw,6rem); font-weight:300; letter-spacing:-0.03em; line-height:0.9;">
+    The <em style="font-style:italic; color:var(--amber)">Process</em>
+  </h2>
+  <div class="process-grid">
+    <div class="process-step">
+      <div class="process-line"></div>
+      <div class="process-step-num">01</div>
+      <h3>Discovery<br>& Dialogue</h3>
+      <p>Deep listening — understanding site, programme, culture, and desire before a single line is drawn.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-line"></div>
+      <div class="process-step-num">02</div>
+      <h3>Concept<br>& Vision</h3>
+      <p>We develop a governing idea — a spatial and material direction that will inform every subsequent decision.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-line"></div>
+      <div class="process-step-num">03</div>
+      <h3>Design<br>& Detail</h3>
+      <p>Architecture and interior resolved in tandem — no detail is too small, no material choice arbitrary.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-step-num">04</div>
+      <h3>Delivery<br>& Legacy</h3>
+      <p>Precision on site, ensuring the built work honours the design intent. The project endures long after completion.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonial -->
+<section id="testimonial">
+  <div class="testimonial-inner">
+    <blockquote class="testimonial-quote">
+      "ARKE didn't design our home. They revealed it —
+      as though it had always been <em>waiting</em> within the landscape."
+    </blockquote>
+    <div class="testimonial-author">
+      — Sarah Al-Rashid <span>· Private Client, Riyadh</span>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="contact-left">
+    <div class="section-label" style="margin-bottom: 2rem;">Get in Touch</div>
+    <h2>Let's Build<br><em>Together</em></h2>
+    <p>We work with a select number of clients each year to ensure every project receives our full attention and the quality it deserves.</p>
+    <div class="contact-details">
+      <div class="contact-item">
+        <div class="contact-item-label">Studio</div>
+        <div class="contact-item-val">London · Dubai · Tokyo</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-label">Email</div>
+        <div class="contact-item-val">hello@arkestudio.com</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-label">New Projects</div>
+        <div class="contact-item-val">projects@arkestudio.com</div>
+      </div>
+    </div>
+  </div>
+  <div class="contact-form">
+    <div class="form-field"><input type="text" placeholder="Your Name"></div>
+    <div class="form-field"><input type="email" placeholder="Email Address"></div>
+    <div class="form-field"><input type="text" placeholder="Project Type"></div>
+    <div class="form-field"><textarea placeholder="Tell us about your project"></textarea></div>
+    <button class="form-submit"><span>Send Enquiry →</span></button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">ARKE Studio</div>
+  <div class="footer-copy">© 2025 All Rights Reserved</div>
+  <div class="footer-socials">
+    <a href="#">Instagram</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">Behance</a>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── CURSOR ── */
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+window.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  gsap.to(cursorDot, { x: mouseX, y: mouseY, duration: 0.05, ease: 'none' });
+});
+
+function animateCursorRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  gsap.set(cursorRing, { x: ringX, y: ringY });
+  requestAnimationFrame(animateCursorRing);
+}
+animateCursorRing();
+
+/* ── LOADER ── */
+const loaderCount = document.getElementById('loader-count');
+const loaderBar = document.getElementById('loader-bar');
+const loader = document.getElementById('loader');
+
+let count = 0;
+const loaderTl = gsap.timeline({
+  onComplete: () => initAnimations()
+});
+
+loaderTl
+  .to(loaderBar, {
+    width: '100%', duration: 2, ease: 'power2.inOut',
+    onUpdate: function() {
+      const progress = Math.round(this.progress() * 100);
+      loaderCount.textContent = String(progress).padStart(2, '0');
+    }
+  })
+  .to(loader, { yPercent: -100, duration: 1, ease: 'expo.inOut', delay: 0.3 });
+
+/* ── CUSTOM LINE SPLITTER (replaces premium SplitText) ── */
+function splitLines(el) {
+  // Wrap each <br>-separated or natural line in a clipping div + inner span
+  const html = el.innerHTML;
+  // Split on <br> tags first
+  const parts = html.split(/<br\s*\/?>/i);
+  el.innerHTML = parts.map(part =>
+    `<div class="split-line-wrap" style="overflow:hidden;display:block">` +
+    `<div class="split-line" style="display:block">${part}</div></div>`
+  ).join('');
+  return el.querySelectorAll('.split-line');
+}
+
+/* ── MAIN ANIMATIONS ── */
+function initAnimations() {
+
+  // Hero title — reveal each word
+  const heroWords = document.querySelectorAll('.reveal-word');
+  gsap.from(heroWords, {
+    y: '100%', duration: 1.2, stagger: 0.15,
+    ease: 'expo.out', delay: 0.1
+  });
+
+  // Hero elements
+  gsap.from('.hero-number', { y: 20, opacity: 0, duration: 1, delay: 0.4, ease: 'power3.out' });
+  gsap.to('.hero-desc',     { opacity: 1, y: 0, duration: 1, delay: 0.9, ease: 'power3.out' });
+  gsap.to('.hero-cta',      { opacity: 1, y: 0, duration: 1, delay: 1.1, ease: 'power3.out' });
+  gsap.to('.scroll-hint',   { opacity: 1, duration: 1, delay: 1.5 });
+
+  // Hero background parallax
+  gsap.to('.hero-bg-img', {
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+    y: '20%', ease: 'none'
+  });
+
+  // Section label reveals
+  gsap.utils.toArray('.section-label').forEach(el => {
+    gsap.from(el, {
+      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
+      x: -30, opacity: 0, duration: 0.8, ease: 'power3.out'
+    });
+  });
+
+  // About heading — split by <br>
+  const aboutH2 = document.querySelector('#about h2');
+  if (aboutH2) {
+    const lines = splitLines(aboutH2);
+    gsap.from(lines, {
+      scrollTrigger: { trigger: aboutH2, start: 'top 80%' },
+      y: '110%', duration: 1, stagger: 0.15, ease: 'expo.out'
+    });
+  }
+
+  // About paragraph reveal
+  gsap.utils.toArray('#about .about-right p').forEach((p, i) => {
+    gsap.from(p, {
+      scrollTrigger: { trigger: p, start: 'top 85%' },
+      y: 30, opacity: 0, duration: 0.9, delay: i * 0.15, ease: 'power3.out'
+    });
+  });
+
+  // Stat counters
+  document.querySelectorAll('.stat-counter').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    const suffix = el.querySelector('span') ? el.querySelector('span').outerHTML : '+';
+    const obj = { val: 0 };
+    gsap.to(obj, {
+      val: target, duration: 2, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 85%' },
+      onUpdate() { el.innerHTML = Math.round(obj.val) + suffix; }
+    });
+  });
+
+  // Projects header — split by <br>
+  const projH2 = document.querySelector('.projects-header h2');
+  if (projH2) {
+    const lines = splitLines(projH2);
+    gsap.from(lines, {
+      scrollTrigger: { trigger: projH2, start: 'top 80%' },
+      y: '110%', duration: 1, stagger: 0.12, ease: 'expo.out'
+    });
+  }
+
+  // Projects horizontal drag scroll
+  const track = document.getElementById('projectsTrack');
+  const outer = track.parentElement;
+  outer.style.overflowX = 'auto';
+  outer.style.cursor = 'grab';
+  let isDown = false, startX, scrollLeft;
+  let velocity = 0, lastX = 0, lastTime = Date.now();
+  let momentum;
+
+  outer.addEventListener('mousedown', e => {
+    isDown = true; startX = e.pageX - outer.offsetLeft;
+    scrollLeft = outer.scrollLeft; outer.style.cursor = 'grabbing';
+    cancelAnimationFrame(momentum);
+  });
+  outer.addEventListener('mouseleave', () => { isDown = false; outer.style.cursor = 'grab'; });
+  outer.addEventListener('mouseup',    () => { isDown = false; outer.style.cursor = 'grab'; startMomentum(); });
+  outer.addEventListener('mousemove', e => {
+    if (!isDown) return; e.preventDefault();
+    const x = e.pageX - outer.offsetLeft;
+    outer.scrollLeft = scrollLeft - (x - startX) * 1.5;
+    velocity = (e.pageX - lastX) / (Date.now() - lastTime + 1) * 15;
+    lastX = e.pageX; lastTime = Date.now();
+  });
+
+  function startMomentum() {
+    function step() {
+      outer.scrollLeft -= velocity; velocity *= 0.95;
+      if (Math.abs(velocity) > 0.1) momentum = requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Project cards stagger reveal
+  gsap.from('.project-card', {
+    scrollTrigger: { trigger: '.projects-scroll-outer', start: 'top 80%' },
+    y: 60, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out'
+  });
+
+  // Project card image parallax on hover
+  document.querySelectorAll('.project-card').forEach(card => {
+    const img = card.querySelector('.project-img');
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+      const yPct = (e.clientY - rect.top)  / rect.height - 0.5;
+      gsap.to(img, { x: xPct * 15, y: yPct * 15, scale: 1.05, duration: 0.6, ease: 'power2.out' });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(img, { x: 0, y: 0, scale: 1, duration: 0.8, ease: 'power3.out' });
+    });
+  });
+
+  // Philosophy quote — split by <br>
+  const philQuote = document.querySelector('.philosophy-quote');
+  if (philQuote) {
+    const lines = splitLines(philQuote);
+    gsap.from(lines, {
+      scrollTrigger: { trigger: philQuote, start: 'top 80%' },
+      y: '110%', duration: 1.2, stagger: 0.1, ease: 'expo.out'
+    });
+    gsap.from('.philosophy-bg-text', {
+      scrollTrigger: { trigger: '#philosophy', start: 'top bottom', end: 'bottom top', scrub: true },
+      x: '-10%', ease: 'none'
+    });
+  }
+
+  // Services reveal
+  gsap.from('.service-item', {
+    scrollTrigger: { trigger: '.services-grid', start: 'top 80%' },
+    y: 40, opacity: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out'
+  });
+
+  // Featured parallax
+  gsap.to('.featured-bg img', {
+    scrollTrigger: { trigger: '#featured', start: 'top bottom', end: 'bottom top', scrub: true },
+    y: '-15%', ease: 'none'
+  });
+  gsap.from('.featured-title', {
+    scrollTrigger: { trigger: '#featured', start: 'top 70%' },
+    y: 60, opacity: 0, duration: 1.2, ease: 'expo.out'
+  });
+  gsap.from('.featured-meta .featured-meta-item', {
+    scrollTrigger: { trigger: '#featured', start: 'top 60%' },
+    y: 20, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out'
+  });
+
+  // Process steps
+  gsap.from('.process-step', {
+    scrollTrigger: { trigger: '.process-grid', start: 'top 80%' },
+    y: 50, opacity: 0, duration: 1, stagger: 0.15, ease: 'power3.out'
+  });
+  gsap.from('.process-line', {
+    scrollTrigger: { trigger: '.process-grid', start: 'top 75%' },
+    scaleX: 0, transformOrigin: 'left center',
+    duration: 1.5, stagger: 0.15, ease: 'expo.out', delay: 0.5
+  });
+
+  // Testimonial — split by <br>
+  const testQuote = document.querySelector('.testimonial-quote');
+  if (testQuote) {
+    const lines = splitLines(testQuote);
+    gsap.from(lines, {
+      scrollTrigger: { trigger: testQuote, start: 'top 80%' },
+      y: '110%', duration: 1, stagger: 0.1, ease: 'expo.out'
+    });
+  }
+
+  // Contact section
+  gsap.from('#contact h2', {
+    scrollTrigger: { trigger: '#contact', start: 'top 75%' },
+    y: 50, opacity: 0, duration: 1.2, ease: 'expo.out'
+  });
+  gsap.from('.contact-item', {
+    scrollTrigger: { trigger: '.contact-details', start: 'top 80%' },
+    x: -30, opacity: 0, duration: 0.8, stagger: 0.12, ease: 'power3.out'
+  });
+  gsap.from('.form-field', {
+    scrollTrigger: { trigger: '.contact-form', start: 'top 80%' },
+    y: 20, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out'
+  });
+
+  // About image clip-path reveal
+  gsap.from('.about-img-wrap', {
+    scrollTrigger: { trigger: '.about-img-wrap', start: 'top 85%' },
+    clipPath: 'inset(100% 0 0 0)', duration: 1.2, ease: 'expo.out'
+  });
+  gsap.from('.about-img-wrap img', {
+    scrollTrigger: { trigger: '.about-img-wrap', start: 'top 85%' },
+    scale: 1.2, duration: 1.5, ease: 'expo.out'
+  });
+
+  // Nav shrink on scroll
+  let navCompact = false;
+  window.addEventListener('scroll', () => {
+    const compact = window.scrollY > 80;
+    if (compact !== navCompact) {
+      navCompact = compact;
+      gsap.to('nav', { padding: compact ? '1rem 3rem' : '2rem 3rem', duration: 0.4, ease: 'power2.out' });
+    }
+  });
+
+  // Smooth anchor scrolling (no ScrollToPlugin needed — use native smooth)
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(anchor.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+// Marquee pause on hover
+const marqueeTrack = document.getElementById('marquee');
+marqueeTrack.addEventListener('mouseenter', () => marqueeTrack.style.animationPlayState = 'paused');
+marqueeTrack.addEventListener('mouseleave', () => marqueeTrack.style.animationPlayState = 'running');
+</script>
+</body>
+</html>
